@@ -1,4 +1,4 @@
-Logistic regression
+# Logistic regression
 
 1. Implement a [sigmoid](https://en.wikipedia.org/wiki/Sigmoid_function) function with a signature `func sigmoid(z float64) float64`.
    Add unit tests for the function. Verify the values for `z = -1`, `z = 0`, `z = 1`, `z = 2`, `z = 3`.
