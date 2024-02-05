@@ -10,3 +10,5 @@ Logistic regression
    $|\vec{p}_{\+}| = m$.
 
    As a helper function, implement `func dot(a []float64, b []float64) float64` function that calculates a dot product of two input vectors.
+
+   Add unit tests for the functions `dot` and `inference`.
