@@ -37,7 +37,7 @@ func inference(inputs [][]float64, w []float64, b float64) (inf []float64) {
 
 func main() {
 	ebiten.SetWindowSize(640, 480)
-	ebiten.SetWindowTitle("Gradient descent")
+	ebiten.SetWindowTitle("Logistic regression")
 
 	img := make(chan *image.RGBA, 1)
 	go func() {
