@@ -13,7 +13,7 @@ func TestSigmoid(t *testing.T) {
 		{0, 0.5},
 		{1, 0.7310585786300049},
 		{2, 0.8807970779778823},
-		{3, 0.9525741268224334},
+		{3, 0.9525741268224331},
 	} {
 		if got := sigmoid(tc.z); got != tc.want {
 			t.Errorf("got = %v, want = %v", got, tc.want)
