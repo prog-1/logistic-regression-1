@@ -26,8 +26,10 @@
    The inputs are
 
    1. a slice of $m$ input vectors $\vec{x}$ ($|\vec{x}| = n$)
-   2. a vector of inference probabilities $\vec{p}_{\+}$ ($|\vec{p}_{\+}| = m$)
-   3. a vector of target values $\vec{y}$ ($|\vec{y}| = m$).
+   2. a vector of inference probabilities $\vec{p}_{\+}$
+   
+      ($|\vec{p}_{\+}| = m$)
+   5. a vector of target values $\vec{y}$ ($|\vec{y}| = m$).
 
    Implement unit tests for the function.
 
