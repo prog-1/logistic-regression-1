@@ -27,9 +27,9 @@
 
    1. a slice of $m$ input vectors $\vec{x}$ ($|\vec{x}| = n$)
    2. a vector of inference probabilities $\vec{p}_{\+}$
-   
+  
       ($|\vec{p}_{\+}| = m$)
-   5. a vector of target values $\vec{y}$ ($|\vec{y}| = m$).
+   4. a vector of target values $\vec{y}$ ($|\vec{y}| = m$).
 
    Implement unit tests for the function.
 
@@ -37,7 +37,8 @@
 
    The algorithm utilizes the gradient calculation
 
-   $$ w_j = w_j - \alpha \frac{\partial J(\vec{w}, b)}{\partial w_j},\ 1 \leq j \leq n$$
-   $$ b = b - \alpha \frac{\partial J(\vec{w}, b)}{\partial b}$$
+   $$w_j = w_j - \alpha \frac{\partial J(\vec{w}, b)}{\partial w_j},\ 1 \leq j \leq n$$
+   
+   $$b = b - \alpha \frac{\partial J(\vec{w}, b)}{\partial b}$$
 
    You may rework the gradient descent algorithm implemented in [gradient-descent](https://github.com/prog-1/gradient-descent) and [gradient-descent-2](https://github.com/prog-1/gradient-descent-2) homeworks.
