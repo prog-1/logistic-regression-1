@@ -49,15 +49,24 @@ func TestSigmoid(t *testing.T) {
 	}
 }
 
-// func TestInference(t *testing.T) {
-// 	type Input struct {
-// 		inputs, w []float64
-// 		b         float64
-// 	}
-// 	for num, tc := range []struct {
-// 		input Input
-// 		want  float64
-// 	}{} {
-
-// 	}
-// }
+func TestInference(t *testing.T) {
+	type Input struct {
+		inputs [][]float64
+		w      []float64
+		b      float64
+	}
+	for _, tc := range []struct {
+		input Input
+		want  []float64
+	}{
+		{Input{inputs: [][]float64{{50, 50}}, w: []float64{0.5, 0.5}, b: -50}, []float64{0.5}},          // Point is on the hyperplane
+		{Input{inputs: [][]float64{{50, 50}, {1, -29}}, w: []float64{0, 0}, b: 0}, []float64{0.5, 0.5}}, // All weights are 0
+	} {
+		got := inference(tc.input.inputs, tc.input.w, tc.input.b)
+		for i := range got {
+			if !nearlyEqual(got[i], tc.want[i], eps) {
+				t.Errorf("inference(%v) = %v, want = %v", tc.input, got, tc.want)
+			}
+		}
+	}
+}
