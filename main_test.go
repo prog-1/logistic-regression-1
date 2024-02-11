@@ -7,7 +7,7 @@ import (
 
 const eps = 1e-5
 
-func nearlyEqual(a, b, epsilon float64) bool {
+func nearlyEqualFloat(a, b, epsilon float64) bool {
 	return math.Abs(a-b) < epsilon
 }
 
@@ -27,7 +27,7 @@ func TestDot(t *testing.T) {
 		{Input{a: []float64{1.5, 2.5}, b: []float64{2.5, 1.5}}, 7.5},
 		{Input{a: []float64{0.5, 0.5}, b: []float64{0.5, 0.5}}, 0.5},
 	} {
-		if got := dot(tc.input.a, tc.input.b); !nearlyEqual(got, tc.want, eps) {
+		if got := dot(tc.input.a, tc.input.b); !nearlyEqualFloat(got, tc.want, eps) {
 			t.Errorf("dot(%v, %v) = %v, want = %v", tc.input.a, tc.input.b, got, tc.want)
 		}
 	}
@@ -43,7 +43,7 @@ func TestSigmoid(t *testing.T) {
 		{2, 0.8807970779778823},
 		{3, 0.9525741268224331},
 	} {
-		if got := sigmoid(tc.input); !nearlyEqual(got, tc.want, eps) {
+		if got := sigmoid(tc.input); !nearlyEqualFloat(got, tc.want, eps) {
 			t.Errorf("sigmoid(%v) = %v, want = %v", tc.input, got, tc.want)
 		}
 	}
@@ -61,12 +61,50 @@ func TestInference(t *testing.T) {
 	}{
 		{Input{inputs: [][]float64{{50, 50}}, w: []float64{0.5, 0.5}, b: -50}, []float64{0.5}},          // Point is on the hyperplane
 		{Input{inputs: [][]float64{{50, 50}, {1, -29}}, w: []float64{0, 0}, b: 0}, []float64{0.5, 0.5}}, // All weights are 0
+		// {Input{inputs: [][]float64{{1,1}{}}}, 0.5},// Hyperspace is parallel to the axis
+		// i.e. points are distributed chaotically, so the only way to split
+		// // one type through another is via utilization of extra dimension.
 	} {
 		got := inference(tc.input.inputs, tc.input.w, tc.input.b)
 		for i := range got {
-			if !nearlyEqual(got[i], tc.want[i], eps) {
+			if !nearlyEqualFloat(got[i], tc.want[i], eps) {
 				t.Errorf("inference(%v) = %v, want = %v", tc.input, got, tc.want)
 			}
+		}
+	}
+}
+
+func TestDCost(t *testing.T) {
+	type Input struct {
+		xs   [][]float64
+		y, p []float64
+	}
+	type Output struct {
+		dw []float64
+		db float64
+	}
+	nearlyEqualOutput := func(got, want Output, epsilon float64) bool {
+		if !nearlyEqualFloat(got.db, want.db, epsilon) || len(got.dw) != len(want.dw) {
+			return false
+		}
+		for j := range got.dw {
+			if !nearlyEqualFloat(got.dw[j], want.dw[j], epsilon) {
+				return false
+			}
+		}
+		return true
+	}
+	for _, tc := range []struct {
+		input Input
+		want  Output
+	}{
+		{input: Input{[][]float64{}, []float64{}, []float64{}}, want: Output{[]float64{}, 0}},                           // No input
+		{input: Input{[][]float64{{1, 2}, {2, 7}}, []float64{3, 9}, []float64{3, 9}}, want: Output{[]float64{0, 0}, 0}}, // Complete match
+	} {
+		var got Output
+		got.dw, got.db = dCost(tc.input.xs, tc.input.y, tc.input.p)
+		if !nearlyEqualOutput(got, tc.want, eps) {
+			t.Errorf("dCost(%v) = %v, want = %v", tc.input, got, tc.want)
 		}
 	}
 }

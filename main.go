@@ -25,3 +25,22 @@ func inference(inputs [][]float64, w []float64, b float64) (probabilities []floa
 	}
 	return probabilities
 }
+
+func dCost(inputs [][]float64, y, p []float64) (dw []float64, db float64) {
+	if len(inputs) == 0 {
+		return dw, db
+	}
+
+	var diff float64
+	m := float64(len(inputs))
+	n := len(inputs[0])
+	dw = make([]float64, n)
+	for i := range inputs {
+		diff = p[i] - y[i]
+		for j := range dw {
+			dw[j] += 1 / m * diff * inputs[i][j]
+		}
+		db += 1 / m * diff
+	}
+	return dw, db
+}
