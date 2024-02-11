@@ -5,7 +5,7 @@ import (
 )
 
 func sigmoid(z float64) float64 {
-	return 1 / (1 + math.Pow(math.E, -z))
+	return 1 / (1 + math.Exp(-z))
 }
 
 func dot(a []float64, b []float64) (res float64) {
