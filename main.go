@@ -43,7 +43,7 @@ func dCost(inputs [][]float64, y, p []float64) (dw []float64, db float64) {
 	return dw, db
 }
 
-func gradientDescent(inputs [][]float64, y, w []float64, alpha, b float64) (neww []float64, newb float64) {
+func gradientDescent(inputs [][]float64, y, w []float64, alpha, b float64) {
 	for i := 0; i < 100; i++ {
 		p := inference(inputs, w, b)
 		dw, db := dCost(inputs, y, p)
@@ -53,7 +53,6 @@ func gradientDescent(inputs [][]float64, y, w []float64, alpha, b float64) (neww
 		b -= alpha * db
 		fmt.Println(w, b)
 	}
-	return neww, newb
 }
 
 func main() {
