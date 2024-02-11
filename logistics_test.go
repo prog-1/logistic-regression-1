@@ -6,7 +6,8 @@ import (
 )
 
 const (
-	e = 0.1 //range (error) of answers
+	e     = 0.1  //range (error) of answers
+	gradE = 0.01 //range (error) of answers for gradients
 )
 
 func TestSigmoid(t *testing.T) {
@@ -93,13 +94,62 @@ func TestInference(t *testing.T) {
 	}
 }
 
-func main() {
+func TestDCost(t *testing.T) {
+	for _, tc := range []struct {
+		name     string
+		inputs   [][]float64
+		y, p     []float64
+		wantedDW []float64
+		wantedDB float64
+	}{
+		{
+			name:     "1",
+			inputs:   [][]float64{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}},
+			y:        []float64{1, 0, 1},
+			p:        []float64{0.7, 0.4, 0.8},
+			wantedDW: []float64{0.096, 0.106, 0.116},
+			wantedDB: 0.03,
+		},
+		// {
+		// 	name:     "2",
+		// 	inputs:   [][]float64{},
+		// 	y:        []float64{},
+		// 	p:        []float64{},
+		// 	wantedDW: []float64{},
+		// 	wantedDB: 0.0,
+		// },
+		{
+			name:     "3",
+			inputs:   [][]float64{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}},
+			y:        []float64{1, 0, 1},
+			p:        []float64{0, 0, 0},
+			wantedDW: []float64{0, 0, 0},
+			wantedDB: 0.0,
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			gotDW, gotDB := dCost(tc.inputs, tc.y, tc.p)
+			for i := range gotDW {
+				if math.Abs(gotDW[i]-tc.wantedDW[i]) > e {
+					t.Errorf("gotDW = %v, wantedDW = %v", gotDW[i], tc.wantedDW[i])
+				}
+			}
+			if math.Abs(gotDB-tc.wantedDB) > e {
+				t.Errorf("gotDB = %v, wantedDB = %v", gotDB, tc.wantedDB)
+			}
+
+		})
+	}
+}
+
+func main12() {
 	testing.Main(
 		/* matchString */ func(a, b string) (bool, error) { return a == b, nil },
 		/* tests */ []testing.InternalTest{
 			{Name: "Test Sigmoid", F: TestSigmoid},
 			{Name: "Test Dot", F: TestDot},
 			{Name: "Test Inference", F: TestInference},
+			{Name: "Test dCost", F: TestDCost},
 		},
 		/* benchmarks */ nil /* examples */, nil)
 }
