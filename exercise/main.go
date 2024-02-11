@@ -30,3 +30,19 @@ func inference(inputs [][]float64, w []float64, b float64) (inf []float64) {
 	}
 	return inf
 }
+
+func dCost(inputs [][]float64, y, p []float64) (dw []float64, db float64) {
+	dw = make([]float64, len(inputs[0]))
+
+	for i := 0; i < len(inputs); i++ {
+		for j := 0; j < len(inputs[0]); j++ {
+			dw[j] += (p[i] - y[i]) * inputs[i][j]
+		}
+	}
+
+	db = 0.0
+	for i := 0; i < len(inputs); i++ {
+		db += (p[i] - y[i])
+	}
+	return dw, db
+}
