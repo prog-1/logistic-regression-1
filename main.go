@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"math"
 )
 
@@ -43,4 +44,11 @@ func dCost(inputs [][]float64, y, p []float64) (dw []float64, db float64) {
 		db += 1 / m * diff
 	}
 	return dw, db
+}
+
+func main() {
+	students := readStudentsFromCSV()
+	for _, student := range students {
+		fmt.Println(student)
+	}
 }
