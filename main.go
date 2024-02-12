@@ -11,8 +11,8 @@ import (
 )
 
 const (
-	epochs       = 100
-	learningRate = 0.03
+	epochs       = 1000
+	learningRate = 0.0001
 )
 
 func main() {
@@ -26,7 +26,6 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	// variables
 	inputs := make([][]float64, 100)
 	for i := range inputs {
 		inputs[i] = make([]float64, 2)
@@ -51,13 +50,13 @@ func gradient(inputs [][]float64, y, w []float64, b float64) {
 	for i := 0; i <= epochs; i++ {
 		fxi := inference(inputs, w, b)
 		dw, db := deratives(inputs, y, fxi)
+		cost := cost(len(inputs), fxi, y)
 		for j := 0; j < len(w); j++ {
 			w[j] = w[j] - learningRate*dw[j]
 		}
 		b = b - learningRate*db
-
-		if i%10 == 0 {
-			fmt.Printf("Epoch nuber: %d\nw: %f\nb: %f\n", i, w, b)
+		if i%100 == 0 {
+			fmt.Printf("Epoch nuber: %d\ndw: %f\ndb: %f\ncost: %f\n", i, dw, db, cost)
 		}
 	}
 }
@@ -93,11 +92,21 @@ func dot(a []float64, b []float64) (res float64) {
 	return res
 }
 
-// func loss(p, y float64) float64 { return -y*math.Log(p) - (1-y)*math.Log(1-p) }
+func loss(p, y float64) float64 { 
+	if y == 1{
+		return -math.Log(p)
+	}else{
+		return -math.Log(1-p)
+	}
+ }
 
-// func cost(n int, y, fxi []float64) (res float64) {
-// 	for i := 0; i < n; i++ {
-// 		res += loss(fxi[i], y[i])
-// 	}
-// 	return res / float64(n)
-// }
+func cost(n int, fxi, y []float64) (res float64) {
+	for i := 0; i < n; i++ {
+		l := loss(fxi[i], y[i])
+		// if math.IsInf(l,1){
+		// 	fmt.Println(fxi[i], y[i])
+		// }
+		res += l
+	}
+	return res / float64(n)
+}
