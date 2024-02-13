@@ -56,15 +56,56 @@ func gradientDescent(inputs [][]float64, y, w []float64, alpha, b float64) {
 	//fmt.Println(w,b)
 }
 
-func accuracy(Trainputs, Testputs [][]float64, Trainy, Testy []float64, w []float64, b float64) (accuracy float64) {
-	newTesty := make([]float64, len(Testputs))
-	for i := 0; i < len(Testputs); i++ {
-		for j := 0; j < len(Testputs[0]);j++{
-			newTesty[i] += w[i] * Testputs[i][j] + b
+func accuracy(inputs [][]float64, y []float64, w []float64, b float64) float64 {
+	prediction := inference(inputs, w, b)
+	var truePos, trueNeg, falsePos, falseNeg float64
+	for i := 0; i < len(y); i++ {
+		if prediction[i] >= 0.5 {
+			if y[i] == 1 {
+				truePos++
+			} else {
+				falsePos++
+			}
+		} else {
+			if y[i] == 0 {
+				trueNeg++
+			} else {
+				falseNeg++
+			}
 		}
-		fmt.Println(newTesty)
 	}
-	return 0.0
+	return (truePos + trueNeg) / (truePos + trueNeg + falsePos + falseNeg)
+}
+
+func split(data [][]string) (xTrain, xTest [][]float64, yTrain, yTest []float64) {
+	half := len(data) / 2
+	segment := len(data[0])
+	xTrain = make([][]float64, half)
+	for i := range xTrain {
+		xTrain[i] = make([]float64, segment)
+	}
+	yTrain = make([]float64, half)
+
+	xTest = make([][]float64, half)
+	for i := range xTest {
+		xTest[i] = make([]float64, segment)
+	}
+	yTest = make([]float64, half)
+
+	for i, row := range data[:half] {
+		for j := 0; j < 2; j++ {
+			xTrain[i][j], _ = strconv.ParseFloat(row[j], 64)
+		}
+		yTrain[i], _ = strconv.ParseFloat(row[2], 64)
+	}
+
+	for i, row := range data[half:] {
+		for j := 0; j < 2; j++ {
+			xTest[i][j], _ = strconv.ParseFloat(row[j], 64)
+		}
+		yTest[i], _ = strconv.ParseFloat(row[2], 64)
+	}
+	return xTrain, xTest, yTrain, yTest
 }
 
 func main() {
@@ -80,41 +121,15 @@ func main() {
 		log.Fatal(err)
 	}
 	// variables
-	half := len(data) / 2
-	fmt.Println(half)
-
-	Trainputs := make([][]float64, half)
-	for i := range Trainputs {
-		Trainputs[i] = make([]float64, 2)
-	}
-	Trainy := make([]float64, 100)
-
-	Testputs := make([][]float64, half)
-	for i := range Testputs {
-		Testputs[i] = make([]float64, 2)
-	}
-	Testy := make([]float64, 100)
-
-	for i, row := range data[:half] {
-		for j := 0; j < 2; j++ {
-			Trainputs[i][j], _ = strconv.ParseFloat(row[j], 64)
-		}
-		Trainy[i], _ = strconv.ParseFloat(row[2], 64)
-	}
-
-	for i, row := range data[half:] {
-		for j := 0; j < 2; j++ {
-			Testputs[i][j], _ = strconv.ParseFloat(row[j], 64)
-		}
-		Testy[i], _ = strconv.ParseFloat(row[2], 64)
-	}
-
-	w := make([]float64, len(Trainputs[0]))
+	xTrain, xTest, yTrain, yTest := split(data)
+	w := make([]float64, len(xTrain[0]))
 	for i := range w {
 		w[i] = rand.Float64()
 	}
 	b := rand.Float64()
-	alpha :=1e-3
-	gradientDescent(Trainputs,Trainy, w, alpha, b)
-	accuracy(Trainputs, Testputs, Trainy, Testy, w, b)
+	alpha := 1e-3
+	gradientDescent(xTrain, yTrain, w, alpha, b)
+	//accuracy(xTrain, yTrain, w, b)
+	score := accuracy(xTest, yTest, w, b)
+	fmt.Println(score)
 }
