@@ -43,7 +43,7 @@ func dCost(inputs [][]float64, y, p []float64) (dw []float64, db float64) {
 	return dw, db
 }
 
-func gradientDescent(inputs [][]float64, y, w []float64, alpha, b float64) {
+func gradientDescent(inputs [][]float64, y, w []float64, alpha, b float64) ([]float64, float64) {
 	for i := 0; i < 100; i++ {
 		p := inference(inputs, w, b)
 		dw, db := dCost(inputs, y, p)
@@ -54,6 +54,7 @@ func gradientDescent(inputs [][]float64, y, w []float64, alpha, b float64) {
 		//fmt.Println(dw, db)
 	}
 	//fmt.Println(w,b)
+	return w, b
 }
 
 func accuracy(inputs [][]float64, y []float64, w []float64, b float64) float64 {
@@ -82,13 +83,13 @@ func split(data [][]string) (xTrain, xTest [][]float64, yTrain, yTest []float64)
 	segment := len(data[0])
 	xTrain = make([][]float64, half)
 	for i := range xTrain {
-		xTrain[i] = make([]float64, segment)
+		xTrain[i] = make([]float64, segment-1)
 	}
 	yTrain = make([]float64, half)
 
 	xTest = make([][]float64, half)
 	for i := range xTest {
-		xTest[i] = make([]float64, segment)
+		xTest[i] = make([]float64, segment-1)
 	}
 	yTest = make([]float64, half)
 
@@ -105,6 +106,7 @@ func split(data [][]string) (xTrain, xTest [][]float64, yTrain, yTest []float64)
 		}
 		yTest[i], _ = strconv.ParseFloat(row[2], 64)
 	}
+	fmt.Println(xTrain, xTest, yTrain, yTest)
 	return xTrain, xTest, yTrain, yTest
 }
 
@@ -128,7 +130,7 @@ func main() {
 	}
 	b := rand.Float64()
 	alpha := 1e-3
-	gradientDescent(xTrain, yTrain, w, alpha, b)
+	w, b = gradientDescent(xTrain, yTrain, w, alpha, b)
 	//accuracy(xTrain, yTrain, w, b)
 	score := accuracy(xTest, yTest, w, b)
 	fmt.Println(score)

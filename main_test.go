@@ -2,6 +2,7 @@ package main
 
 import (
 	"math"
+	"reflect"
 	"testing"
 )
 
@@ -128,5 +129,43 @@ func TestDCost(t *testing.T) {
 		if db != test.expected.db {
 			t.Errorf("Expected dCost(%v, %v, %v) to return db %f, but got %f", test.inputs, test.y, test.p, test.expected.db, db)
 		}
+	}
+}
+func TestSplit(t *testing.T) {
+	data := [][]string{
+		{"1", "2", "3"},
+		{"4", "5", "6"},
+		{"7", "8", "9"},
+		{"10", "11", "12"},
+	}
+
+	xTrainExpected := [][]float64{
+		{1, 2},
+		{4, 5},
+	}
+	yTrainExpected := []float64{3, 6}
+
+	xTestExpected := [][]float64{
+		{7, 8},
+		{10, 11},
+	}
+	yTestExpected := []float64{9, 12}
+
+	xTrain, xTest, yTrain, yTest := split(data)
+
+	if !reflect.DeepEqual(xTrain, xTrainExpected) {
+		t.Errorf("Expected xTrain to be %v, but got %v", xTrainExpected, xTrain)
+	}
+
+	if !floatSlicesEqual(yTrain, yTrainExpected) {
+		t.Errorf("Expected yTrain to be %v, but got %v", yTrainExpected, yTrain)
+	}
+
+	if !reflect.DeepEqual(xTest, xTestExpected) {
+		t.Errorf("Expected xTest to be %v, but got %v", xTestExpected, xTest)
+	}
+
+	if !floatSlicesEqual(yTest, yTestExpected) {
+		t.Errorf("Expected yTest to be %v, but got %v", yTestExpected, yTest)
 	}
 }
