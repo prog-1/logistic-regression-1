@@ -80,3 +80,25 @@ func TestInference(t *testing.T) {
 		}
 	}
 }
+
+func TestDCost(t *testing.T) {
+	for _, tc := range []struct {
+		inputs      [][]float64
+		y, p, want1 []float64
+		want2       float64
+	}{
+		{inputs: [][]float64{{10, 20}, {30, -50}, {5, 5}}, y: []float64{1, 2, 3}, p: []float64{3, 2, 5}, want1: []float64{10, 16.666667}, want2: 1.333333},
+		{inputs: [][]float64{{10, 20}, {30, -50}}, y: []float64{2, 1}, p: []float64{2, 1}, want1: []float64{0, 0}, want2: 0},
+		{inputs: [][]float64{{1, 2}, {3, 1}}, y: []float64{1, 1}, p: []float64{2, 2}, want1: []float64{2, 1.5}, want2: 1},
+	} {
+		got1, got2 := dCost(tc.inputs, tc.y, tc.p)
+		for i := range got1 {
+			if math.Abs(got1[i]-tc.want1[i]) > 1e-6 {
+				t.Errorf("got1 = %v, want1 = %v", got1, tc.want1)
+			}
+		}
+		if math.Abs(got2-tc.want2) > 1e-6 {
+			t.Errorf("got2 = %v, want2 = %v", got2, tc.want2)
+		}
+	}
+}
