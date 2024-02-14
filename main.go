@@ -42,11 +42,12 @@ func main() {
 		w[i] = rand.Float64()
 	}
 
-	b := 0.
-	gradient(inputs, y, w, b)
+	xTrain, xTest, yTrain, yTest := split(inputs, y)
+	wTrained, bTrained := gradient(xTrain, yTrain, w, 0.)
+	fmt.Println("Final accuracy:", accuracy(xTest, yTest, wTrained, bTrained))
 }
 
-func gradient(inputs [][]float64, y, w []float64, b float64) {
+func gradient(inputs [][]float64, y, w []float64, b float64) ([]float64, float64) {
 	for i := 0; i <= epochs; i++ {
 		fxi := inference(inputs, w, b)
 		dw, db := deratives(inputs, y, fxi)
@@ -59,6 +60,7 @@ func gradient(inputs [][]float64, y, w []float64, b float64) {
 			fmt.Printf("Epoch nuber: %d\ndw: %f\ndb: %f\ncost: %f\n", i, dw, db, cost)
 		}
 	}
+	return w, b
 }
 
 func deratives(inputs [][]float64, y, fxi []float64) (dw []float64, db float64) {
@@ -92,13 +94,13 @@ func dot(a []float64, b []float64) (res float64) {
 	return res
 }
 
-func loss(p, y float64) float64 { 
-	if y == 1{
+func loss(p, y float64) float64 {
+	if y == 1 {
 		return -math.Log(p)
-	}else{
-		return -math.Log(1-p)
+	} else {
+		return -math.Log(1 - p)
 	}
- }
+}
 
 func cost(n int, fxi, y []float64) (res float64) {
 	for i := 0; i < n; i++ {
@@ -109,4 +111,20 @@ func cost(n int, fxi, y []float64) (res float64) {
 		res += l
 	}
 	return res / float64(n)
+}
+
+func split(inputs [][]float64, y []float64) (xTrain, xTest [][]float64, yTrain, yTest []float64) {
+	xTrain, xTest = inputs[:len(inputs)*9/10], inputs[len(inputs)*9/10:]
+	yTrain, yTest = y[:len(y)*9/10], y[len(y)*9/10:]
+	return xTrain, xTest, yTrain, yTest
+}
+
+func accuracy(inputs [][]float64, y []float64, w []float64, b float64) float64 {
+	var res float64
+	for i, x := range inputs {
+		if y[i] == math.Round(sigmoid(dot(x, w)+b)) {
+			res++
+		}
+	}
+	return res / float64(len(y)) * 100
 }
