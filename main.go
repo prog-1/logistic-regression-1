@@ -43,18 +43,20 @@ func dCost(inputs [][]float64, y, p []float64) (dw []float64, db float64) {
 	return dw, db
 }
 
-func gradientDescent(inputs [][]float64, y, w []float64, alpha, b float64) ([]float64, float64) {
+func gradientDescent(inputs [][]float64, y, w []float64, alpha, b float64) ([]float64, float64, []float64, float64) {
+	var dw []float64
+	var db float64
 	for i := 0; i < 100; i++ {
 		p := inference(inputs, w, b)
-		dw, db := dCost(inputs, y, p)
+		dw, db = dCost(inputs, y, p)
 		for j := 0; j < len(w); j++ {
 			w[j] -= alpha * dw[j]
 		}
 		b -= alpha * db
 		//fmt.Println(dw, db)
+		//fmt.Println(w, b)
 	}
-	//fmt.Println(w,b)
-	return w, b
+	return w, b, dw, db
 }
 
 func accuracy(inputs [][]float64, y []float64, w []float64, b float64) float64 {
@@ -106,7 +108,7 @@ func split(data [][]string) (xTrain, xTest [][]float64, yTrain, yTest []float64)
 		}
 		yTest[i], _ = strconv.ParseFloat(row[2], 64)
 	}
-	fmt.Println(xTrain, xTest, yTrain, yTest)
+	//fmt.Println(xTrain, xTest, yTrain, yTest)
 	return xTrain, xTest, yTrain, yTest
 }
 
@@ -123,6 +125,8 @@ func main() {
 		log.Fatal(err)
 	}
 	// variables
+	var dw []float64
+	var db float64
 	xTrain, xTest, yTrain, yTest := split(data)
 	w := make([]float64, len(xTrain[0]))
 	for i := range w {
@@ -130,8 +134,12 @@ func main() {
 	}
 	b := rand.Float64()
 	alpha := 1e-3
-	w, b = gradientDescent(xTrain, yTrain, w, alpha, b)
+	fmt.Printf("Start values of weights and bias: %v, %v: \n", w, b)
+	w, b, dw, db = gradientDescent(xTrain, yTrain, w, alpha, b)
+	fmt.Printf("End values of weights and bias: %v, %v: \n", w, b)
+	fmt.Printf("End values of dw and db: %v, %v: \n", dw, db)
+	fmt.Println("Epochs: 100")
 	//accuracy(xTrain, yTrain, w, b)
 	score := accuracy(xTest, yTest, w, b)
-	fmt.Println(score)
+	fmt.Printf("Score: %v\n", score)
 }
