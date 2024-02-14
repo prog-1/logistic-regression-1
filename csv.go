@@ -7,7 +7,7 @@ import (
 )
 
 // Writes data from .csv file row by row to the sink
-func readCSV(path string, sink func(row []string)) error {
+func readCSV(path string, sink func(row []string) error) error {
 	file, err := os.Open(path)
 	if err != nil {
 		return err
@@ -24,7 +24,9 @@ func readCSV(path string, sink func(row []string)) error {
 		} else if err != nil {
 			return err
 		}
-		sink(record)
+		if err = sink(record); err != nil {
+			return err
+		}
 	}
 	return nil
 }

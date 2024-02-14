@@ -1,54 +1,48 @@
 package main
 
 import (
+	"errors"
 	"fmt"
-	"math"
+	"image"
+	"log"
 )
 
-func sigmoid(z float64) float64 {
-	return 1 / (1 + math.Exp(-z))
-}
-
-func dot(a []float64, b []float64) (res float64) {
-	for i := range a {
-		res += a[i] * b[i]
+// sinkingCondition() defines in what case sink() is executed
+func train(xs Inputs, ys []float64, sinkingCondition func(epoch int) bool, sink func(epoch int, weights, derivatives WeightRelated)) (weights WeightRelated, err error) {
+	if len(xs) < 1 {
+		return weights, errors.New("No training examples provided")
 	}
-	return res
-}
+	// m := len(xs)    // number of training examples
+	// n := len(xs[0]) // number of features
 
-func prediction(x []float64, w []float64, b float64) float64 {
-	return sigmoid(dot(w, x) + b)
-}
-
-func inference(inputs [][]float64, w []float64, b float64) (probabilities []float64) {
-	for _, x := range inputs {
-		probabilities = append(probabilities, prediction(x, w, b))
-	}
-	return probabilities
-}
-
-func dCost(inputs [][]float64, y, p []float64) (dw []float64, db float64) {
-	if len(inputs) == 0 {
-		return dw, db
-	}
-
-	var diff float64
-	m := float64(len(inputs))
-	n := len(inputs[0])
-	dw = make([]float64, n)
-	for i := range inputs {
-		diff = p[i] - y[i]
-		for j := range dw {
-			dw[j] += 1 / m * diff * inputs[i][j]
-		}
-		db += 1 / m * diff
-	}
-	return dw, db
+	return weights, nil
 }
 
 func main() {
-	students := readStudentsFromCSV()
-	for _, student := range students {
-		fmt.Println(student)
+	xs, ys := readExams1()
+	img := make(chan *image.RGBA, 1)
+	PosXS, NegXS, err := splitTrainingSet(xs, ys)
+	if err != nil {
+		log.Fatal(err)
+	}
+	trainingInputScatters, err := trainingInputScatters(PosXS, NegXS)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if weights, err := train(xs, ys, func(epoch int) bool { return epoch%1000 == 0 }, func(epoch int, weights, derivatives WeightRelated) {
+		select {
+		case img <- Plot(trainingInputScatters[0], trainingInputScatters[1],
+			/*TODO: Pass categorisation division function*/):
+		default:
+		}
+		fmt.Printf("Epoch: %v\n\n", epoch)
+		fmt.Printf("Weights:\nw0 = %v, ws = %v\nb = %v, bws = %v\n\n", weights.ws, weights.ws, weights.b, weights.bws)
+		fmt.Printf("Derivatives:\nw0 = %v, ws = %v\nb = %v, bws = %v\n\n", derivatives.w0, derivatives.ws, derivatives.b, derivatives.bws)
+		fmt.Println()
+	}); err != nil {
+		log.Fatal(err)
+	} else {
+		fmt.Println(weights)
 	}
 }
