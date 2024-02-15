@@ -136,7 +136,6 @@ func main() {
 	}
 	// variables
 	p := plot.New()
-
 	var dw []float64
 	var db float64
 	xTrain, xTest, yTrain, yTest, draw := split(data)
@@ -147,15 +146,14 @@ func main() {
 	b := rand.Float64() *2
 	alpha := 1e-3
 	epochs := 100000
+	// Output formatting
 	fmt.Printf("Start values of weights and bias: %v, %v: \n", w, b)
 	w, b, dw, db = gradientDescent(xTrain, yTrain, w, alpha, b, epochs)
 	fmt.Printf("End values of weights and bias: %v, %v: \n", w, b)
 	fmt.Printf("End values of dw and db: %v, %v: \n", dw, db)
 	fmt.Printf("Epochs: %v\n", epochs)
-	//accuracy(xTrain, yTrain, w, b)
 	score := accuracy(xTest, yTest, w, b)
 	fmt.Printf("Score: %v\n", score)
-	//fmt.Println(draw)
 	// drawing
 	scatter, err := plotter.NewScatter(draw)
 	if err != nil {
@@ -164,10 +162,10 @@ func main() {
 	scatter.GlyphStyle.Color = color.RGBA{R: 255, A: 255}
 	scatter.GlyphStyle.Radius = vg.Points(4)
 	// Add the scatter plot to the plot and set the axes labels
-p.Add(scatter)
-p.Title.Text = "LOGistic regression"
-p.X.Label.Text = "exam1"
-p.Y.Label.Text = "exam2"
+	p.Add(scatter)
+	p.Title.Text = "LOGistic regression"
+	p.X.Label.Text = "exam1"
+	p.Y.Label.Text = "exam2"
 
 // Save the plot to a PNG file
 if err := p.Save(4*vg.Inch, 4*vg.Inch, "scatter.png"); err != nil {
