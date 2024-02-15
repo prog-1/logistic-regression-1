@@ -6,7 +6,7 @@ import (
 )
 
 const (
-	epochCount = 1e5
+	epochCount = 1e6
 	lrw, lrb   = 1e-3, 0.5
 )
 

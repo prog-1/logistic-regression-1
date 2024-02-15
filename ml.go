@@ -2,26 +2,11 @@ package main
 
 import (
 	"math"
-	"math/rand"
 )
 
 const (
 	randMin, randMax = 1500, 2000
 )
-
-func RandWeights() (w []float64, b float64) {
-	RandFloat := func() float64 {
-		return randMin + rand.Float64()*(randMax-randMin)
-	}
-	RandArr := func() []float64 {
-		arr := make([]float64, argumentCount)
-		for i := 0; i < argumentCount; i++ {
-			arr[i] = RandFloat()
-		}
-		return arr
-	}
-	return RandArr(), RandFloat()
-}
 
 func sigmoid(z float64) float64 {
 	return 1 / (1 + math.Exp(-z))
@@ -66,8 +51,7 @@ func train(epochCount int, xs [][]float64, ys []float64, lrw, lrb float64, sink 
 		panic("no training examples provided")
 	}
 
-	// weights = RandWeights()
-	w = make([]float64, 2)
+	w = make([]float64, argumentCount)
 	for epoch := 0; epoch < epochCount; epoch++ {
 		dw, db := dCost(xs, ys, inference(xs, w, b))
 
