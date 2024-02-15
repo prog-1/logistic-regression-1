@@ -6,34 +6,12 @@ import (
 )
 
 const (
-	epochCount   = 1e5
-	learningRate = 1e-3
+	epochCount = 1e5
+	lrw, lrb   = 1e-3, 0.5
 )
 
-// sinkingCondition() defines in what case sink() is executed
-func train(epochCount int, xs Inputs, ys []float64, learningRate float64, sink func(epoch int, weights, derivatives WeightRelated)) (weights WeightRelated, err error) {
-	if len(xs) < 1 {
-		// return weights, errors.New("no training examples provided")
-		panic("no training examples provided")
-	}
-
-	// weights = RandWeights()
-	var derivatives WeightRelated
-	for epoch := 0; epoch < epochCount; epoch++ {
-		derivatives = dCost(xs, ys, inference(xs, weights))
-		weights.adjustWeights(&derivatives, learningRate)
-		sink(epoch, weights, derivatives)
-	}
-
-	return weights, nil
-}
-
 func main() {
-	xs, ys := readExams1()
-	// PosXS, NegXS, err := splitTrainingSet(xs, ys)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
+	xs, ys := ReadExams1()
 	// trainingInputScatters, err := trainingInputScatters(PosXS, NegXS)
 	// if err != nil {
 	// 	log.Fatal(err)
@@ -46,7 +24,7 @@ func main() {
 
 	// img := make(chan *image.RGBA, 1)
 	// go func() {
-	if weights, err := train(epochCount, xs, ys, learningRate, func(epoch int, weights, derivatives WeightRelated) {
+	sink := func(epoch int, w, dw []float64, b, db float64) {
 		if epoch%1e4 != 0 {
 			return
 		}
@@ -56,13 +34,15 @@ func main() {
 		// default:
 		// }
 		fmt.Printf("Epoch: %v\n\n", epoch)
-		// fmt.Printf("Weights:\nws = %v\nb = %v\n\n", weights.ws, weights.b)
-		fmt.Printf("Derivatives:\nws = %v\nb = %v\n\n", derivatives.ws, derivatives.b)
+		// fmt.Printf("Weights:\nws = %v\nb = %v\n\n", w, b)
+		fmt.Printf("Derivatives:\nws = %v\nb = %v\n\n", dw, db)
 		fmt.Println()
-	}); err != nil {
+	}
+
+	if w, b, err := train(epochCount, xs, ys, lrw, lrb, sink); err != nil {
 		log.Fatal(err)
 	} else {
-		fmt.Printf("Weights:\nws = %v\nb = %v\n\n", weights.ws, weights.b)
+		fmt.Printf("Weights:\nws = %v\nb = %v\n\n", w, b)
 	}
 
 	// }()
