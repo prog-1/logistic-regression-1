@@ -2,6 +2,7 @@ package main
 
 import (
 	"math"
+	"time"
 )
 
 const (
@@ -11,16 +12,16 @@ const (
 )
 
 // takes all point data, calculates logistic regression and returnes coefficients
-func logisticRegression(input [][]float64, y []float64) ([]float64, float64) {
+func (a *App) logisticRegression(input [][]float64, y []float64) {
 
 	w := make([]float64, len(input[0])) //declaring w coefficients
 	var b float64                       //declaring b coefficient
 
 	for epoch := 1; epoch <= epochs; epoch++ { // for every epoch
 		w, b = gradientDescent(w, b, input, y) // adjusting all coefficients
-		//time.Sleep(time.Millisecond)            //delay to monitor the updates
+		a.updatePlot(w, b, input, y)           //recreating plot with new values
+		time.Sleep(time.Millisecond)           //delay to monitor the updates
 	}
-	return w, b // returning trained coefficients
 }
 
 // adjusting coefficients for w1*x1 + w2*x2 + ... + wn*xn + b
