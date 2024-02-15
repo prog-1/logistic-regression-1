@@ -2,25 +2,25 @@ package main
 
 import (
 	"math"
-	"time"
 )
 
 const (
 	epochs = 10000
-	lr     = 0.001
+	lrw    = 0.001
+	lrb    = 4
 )
 
-// takes all point data, calculates logistic regression and sends them for drawing
-func logisticRegression(input [][]float64, y []float64) {
+// takes all point data, calculates logistic regression and returnes coefficients
+func logisticRegression(input [][]float64, y []float64) ([]float64, float64) {
 
 	w := make([]float64, len(input[0])) //declaring w coefficients
 	var b float64                       //declaring b coefficient
 
 	for epoch := 1; epoch <= epochs; epoch++ { // for every epoch
-		w, b := gradientDescent(w, b, input, y) // adjusting all coeficients
-		time.Sleep(time.Millisecond)            //delay to monitor the updates
+		w, b = gradientDescent(w, b, input, y) // adjusting all coefficients
+		//time.Sleep(time.Millisecond)            //delay to monitor the updates
 	}
-	//draw somehow
+	return w, b // returning trained coefficients
 }
 
 // adjusting coefficients for w1*x1 + w2*x2 + ... + wn*xn + b
@@ -30,9 +30,9 @@ func gradientDescent(w []float64, b float64, input [][]float64, y []float64) ([]
 	dw, db := dCost(input, y, predictions) // get current gradients
 
 	for feature := range w { // for every feature
-		w[feature] -= dw[feature] * lr // adjust w coefficient
+		w[feature] -= dw[feature] * lrw // adjust w coefficient
 	}
-	b -= db * lr // adjust b coefficient
+	b -= db * lrb // adjust b coefficient
 
 	return w, b // returning adjusted coefficients
 }
@@ -48,7 +48,9 @@ func dCost(input [][]float64, y []float64, predictions []float64) (dw []float64,
 		dw[i] = ((1/m)*(p(x[i])-y[i])*x[i])
 		db = ((1/m)*(p(x[i])-y[i])*x[i])
 	*/
-	m := float64(len(input)) //number of points
+
+	m := float64(len(input))
+	dw = make([]float64, len(input[0])) //initializing lenght of the dw slice
 
 	for i, point := range input { //for each point
 		for feature := range point { //for each feature
@@ -60,8 +62,9 @@ func dCost(input [][]float64, y []float64, predictions []float64) (dw []float64,
 }
 
 // a.k.a. prediction (for all points)
-func inference(input [][]float64, w []float64, b float64) (p []float64) {
-	for i := range input { //for every point
+func inference(input [][]float64, w []float64, b float64) []float64 {
+	p := make([]float64, len(input)) //declaring prediction slice
+	for i := range input {           //for every point
 		p[i] = g(dot(w, input[i]) + b) //w - weights for each feature | input[i] - concrete point
 	}
 	return p
