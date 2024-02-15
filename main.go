@@ -2,12 +2,19 @@ package main
 
 import (
 	"encoding/csv"
+	"image/color"
+	"image"
 	"fmt"
 	"log"
 	"math"
 	"math/rand"
 	"os"
 	"strconv"
+	"gonum.org/v1/plot"
+	"gonum.org/v1/plot/plotter"
+	"gonum.org/v1/plot/vg/draw"
+	"gonum.org/v1/plot/vg/vgimg"
+	"gonum.org/v1/plot/vg"
 )
 
 func sigmoid(z float64) float64 {
@@ -43,10 +50,10 @@ func dCost(inputs [][]float64, y, p []float64) (dw []float64, db float64) {
 	return dw, db
 }
 
-func gradientDescent(inputs [][]float64, y, w []float64, alpha, b float64) ([]float64, float64, []float64, float64) {
+func gradientDescent(inputs [][]float64, y, w []float64, alpha, b float64, epochs int) ([]float64, float64, []float64, float64) {
 	var dw []float64
 	var db float64
-	for i := 0; i < 100; i++ {
+	for i := 0; i < epochs; i++ {
 		p := inference(inputs, w, b)
 		dw, db = dCost(inputs, y, p)
 		for j := 0; j < len(w); j++ {
@@ -80,8 +87,9 @@ func accuracy(inputs [][]float64, y []float64, w []float64, b float64) float64 {
 	return (truePos + trueNeg) / (truePos + trueNeg + falsePos + falseNeg)
 }
 
-func split(data [][]string) (xTrain, xTest [][]float64, yTrain, yTest []float64) {
+func split(data [][]string) (xTrain, xTest [][]float64, yTrain, yTest []float64, draw plotter.XYs) {
 	half := len(data) / 2
+	draw = make(plotter.XYs, half)
 	segment := len(data[0])
 	xTrain = make([][]float64, half)
 	for i := range xTrain {
@@ -105,11 +113,13 @@ func split(data [][]string) (xTrain, xTest [][]float64, yTrain, yTest []float64)
 	for i, row := range data[half:] {
 		for j := 0; j < 2; j++ {
 			xTest[i][j], _ = strconv.ParseFloat(row[j], 64)
+			draw[i].X, _ = strconv.ParseFloat(row[0], 64)
+			draw[i].Y, _ = strconv.ParseFloat(row[1], 64)
 		}
 		yTest[i], _ = strconv.ParseFloat(row[2], 64)
 	}
 	//fmt.Println(xTrain, xTest, yTrain, yTest)
-	return xTrain, xTest, yTrain, yTest
+	return xTrain, xTest, yTrain, yTest, draw
 }
 
 func main() {
@@ -125,21 +135,53 @@ func main() {
 		log.Fatal(err)
 	}
 	// variables
+	p := plot.New()
+
 	var dw []float64
 	var db float64
-	xTrain, xTest, yTrain, yTest := split(data)
+	xTrain, xTest, yTrain, yTest, draw := split(data)
 	w := make([]float64, len(xTrain[0]))
 	for i := range w {
-		w[i] = rand.Float64()
+		w[i] = rand.Float64()*2
 	}
-	b := rand.Float64()
+	b := rand.Float64() *2
 	alpha := 1e-3
+	epochs := 100000
 	fmt.Printf("Start values of weights and bias: %v, %v: \n", w, b)
-	w, b, dw, db = gradientDescent(xTrain, yTrain, w, alpha, b)
+	w, b, dw, db = gradientDescent(xTrain, yTrain, w, alpha, b, epochs)
 	fmt.Printf("End values of weights and bias: %v, %v: \n", w, b)
 	fmt.Printf("End values of dw and db: %v, %v: \n", dw, db)
-	fmt.Println("Epochs: 100")
+	fmt.Printf("Epochs: %v\n", epochs)
 	//accuracy(xTrain, yTrain, w, b)
 	score := accuracy(xTest, yTest, w, b)
 	fmt.Printf("Score: %v\n", score)
+	//fmt.Println(draw)
+	// drawing
+	scatter, err := plotter.NewScatter(draw)
+	if err != nil {
+		panic(err)
+	}
+	scatter.GlyphStyle.Color = color.RGBA{R: 255, A: 255}
+	scatter.GlyphStyle.Radius = vg.Points(4)
+	// Add the scatter plot to the plot and set the axes labels
+p.Add(scatter)
+p.Title.Text = "LOGistic regression"
+p.X.Label.Text = "exam1"
+p.Y.Label.Text = "exam2"
+
+// Save the plot to a PNG file
+if err := p.Save(4*vg.Inch, 4*vg.Inch, "scatter.png"); err != nil {
+    panic(err)
+}
+}
+
+func Plot(ps ...plot.Plotter) *image.RGBA {
+	p := plot.New()
+	p.Add(append([]plot.Plotter{
+		plotter.NewGrid(),
+	}, ps...)...)
+	img := image.NewRGBA(image.Rect(0, 0, 640, 480))
+	c := vgimg.NewWith(vgimg.UseImage(img))
+	p.Draw(draw.New(c))
+	return c.Image().(*image.RGBA)
 }
