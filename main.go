@@ -18,9 +18,9 @@ import (
 )
 
 const (
-	epochs                           = 10000
+	epochs                           = 1e4
 	printEveryNthEpochs              = 500
-	learningRateW                    = 0.2e-1
+	learningRateW                    = 0.4e-2
 	learningRateB                    = 0.5
 	inputPointsMinX, inputPointsMaxX = 0, 100
 )
