@@ -67,6 +67,11 @@ func train(epochCount int, xs [][]float64, ys []float64, lrw, lrb float64, sink 
 	return w, b, nil
 }
 
-// func decisionBoundaryFunction(x1, x2 float64) func(float64) float64 {
-
-// }
+func decisionBoundaryFunction(w []float64, b float64) func(float64) float64 {
+	if len(w) != 2 {
+		panic("more than 2 parameters in model")
+	}
+	return func(x float64) float64 {
+		return -(w[0]*x + b) / w[1]
+	}
+}
