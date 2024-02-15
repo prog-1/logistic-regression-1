@@ -11,6 +11,10 @@ import (
 	"gonum.org/v1/plot/vg/vgimg"
 )
 
+const (
+	lineXMin, lineXMax = 25, 100 // x coordinates of the line
+)
+
 // Converting plot to ebiten.Image
 func PlotToImage(p *plot.Plot) *ebiten.Image {
 
@@ -52,14 +56,34 @@ func (a *App) updatePlot(w []float64, b float64, inputs [][]float64, y []float64
 	}
 
 	//Green scatter
-	greenScatter, _ := plotter.NewScatter(greenPlotter) //creating new scatter from point data
-	greenScatter.Color = blue
-	p.Add(greenScatter)
+	blueScatter, _ := plotter.NewScatter(greenPlotter) //creating new scatter from point data
+	blueScatter.Color = blue
+	p.Add(blueScatter)
 
 	//Red scatter
 	redScatter, _ := plotter.NewScatter(redPlotter) //creating new scatter from point data
 	redScatter.Color = red
 	p.Add(redScatter)
+
+	//####################### Line ##############################
+
+	/*
+		(x1 = X | x2 = Y)
+
+		0 = k*x + b
+		0 = w1x1 + w2x2 + b
+		-w2x2 = w1x1 + b
+		w2x2 = - b - w1x1
+		x2 = (-w1x1-b) / w2
+	*/
+
+	linePlotter := plotter.XYs{
+		{X: lineXMin, Y: (-w[0]*lineXMin - b) / w[1]},
+		{X: lineXMax, Y: (-w[0]*lineXMax - b) / w[1]},
+	}
+
+	line, _ := plotter.NewLine(linePlotter) //creating line
+	p.Add(line)                             // adding line to the plot
 
 	//##################### Ebiten #############################
 

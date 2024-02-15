@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"math"
 	"time"
 )
@@ -19,8 +20,13 @@ func (a *App) logisticRegression(input [][]float64, y []float64) {
 
 	for epoch := 1; epoch <= epochs; epoch++ { // for every epoch
 		w, b = gradientDescent(w, b, input, y) // adjusting all coefficients
-		a.updatePlot(w, b, input, y)           //recreating plot with new values
-		time.Sleep(time.Millisecond)           //delay to monitor the updates
+
+		if epoch%100 == 0 { //every 100th epoch{
+			fmt.Println("Epoch", epoch, "w1:", w[0], "| w2:", w[1], "| b:", b) // coefficient debug
+		}
+
+		a.updatePlot(w, b, input, y) //recreating plot with new values
+		time.Sleep(time.Millisecond) //delay to monitor the updates
 	}
 }
 
