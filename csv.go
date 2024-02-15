@@ -9,7 +9,8 @@ import (
 )
 
 const (
-	numberOfPoints = 100
+	numberOfPoints         = 100
+	numberOfTrainingPoints = 80
 )
 
 func getPoints() (inputs [][]float64, y []float64) {
@@ -76,12 +77,20 @@ func readPoints(file io.Reader) ([][]float64, []float64) {
 	return inputs, y
 }
 
-// // Splits [][] slice into 2x [] slices
-// func split2DSlice(s [][]float64) (s1, s2 []float64) {
-// 	for row := range s { // for every slice (row)
-// 		s1 = append(s1, s[row][0])
-// 		s2 = append(s2, s[row][1])
-// 		//slight hardcode over here
-// 	}
-// 	return s1, s2
-// }
+// Splits the input data set into the Training and Test data sets
+func split(inputs [][]float64, y []float64) (xTrain, xTest [][]float64, yTrain, yTest []float64) {
+
+	//Saving training points
+	for i := 0; i < numberOfTrainingPoints; i++ { // 80 points
+		xTrain = append(xTrain, inputs[i]) //saving X slice with features
+		yTrain = append(yTrain, y[i])      //saving Y
+	}
+
+	//Saiving test points
+	for i := 0; i < numberOfPoints-numberOfTrainingPoints; i++ { // 100-80 = 20 points
+		xTest = append(xTest, inputs[i]) //saving X slice with features
+		yTest = append(yTest, y[i])      //saving Y
+	}
+
+	return xTrain, xTest, yTrain, yTest
+}

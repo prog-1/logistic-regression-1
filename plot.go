@@ -47,7 +47,7 @@ func (a *App) updatePlot(w []float64, b float64, inputs [][]float64, y []float64
 	var redPlotter plotter.XYs   //initializing red point plotter
 
 	//Distributing the points to separate plotters
-	for i := 0; i < numberOfPoints; i++ { //for every point
+	for i := 0; i < numberOfTrainingPoints; i++ { //for every point
 		if y[i] == 0 { //if the current point is false/0/negative
 			greenPlotter = append(greenPlotter, plotter.XY{X: inputs[i][0], Y: inputs[i][1]}) //Saving the point in green plotter
 		} else { //if the current point is true/1/positive

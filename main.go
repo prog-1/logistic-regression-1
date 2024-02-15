@@ -10,7 +10,9 @@ func main() {
 
 	//####################### Points #########################
 
-	inputs, y := getPoints() //gettings point data
+	inputs, y := getPoints() //gettings data sets
+
+	xTrain, xTest, yTrain, yTest := split(inputs, y) //splitting data sets
 
 	//####################### Ebiten #########################
 
@@ -24,7 +26,7 @@ func main() {
 	//####################### Logistic Regression #########################
 
 	go func() { //Starting logistic regression in another thread
-		a.logisticRegression(inputs, y)
+		a.logisticRegression(xTrain, xTest, yTrain, yTest)
 	}()
 
 	//####################### Ebiten #########################
