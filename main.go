@@ -2,37 +2,37 @@ package main
 
 import (
 	"fmt"
+	"image"
+	"image/color"
 	"log"
+
+	"github.com/hajimehoshi/ebiten/v2"
 )
 
 const (
 	epochCount = 1e6
 	lrw, lrb   = 1e-3, 0.5
+	screenHeight, screenWidth = 720, 480
 )
 
 func main() {
 	xs, ys := ReadExams1()
-	// trainingInputScatters, err := trainingInputScatters(PosXS, NegXS)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
+	PosScatter, NegScatter, err := trainingInputScatters(xs, ys, color.RGBA{0, 255, 0, 255}, color.RGBA{255, 0, 0, 255})
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	// var learningRates WeightRelated = WeightRelated{
-	// 	ws: [argumentCount]float64{1e-2, 1e-2},
-	// 	b:  5e-3,
-	// }
-
-	// img := make(chan *image.RGBA, 1)
-	// go func() {
+	img := make(chan *image.RGBA, 1)
+	go func() {
 	sink := func(epoch int, w, dw []float64, b, db float64) {
 		if epoch%1e4 != 0 {
 			return
 		}
-		// select {
-		// case img <- Plot(trainingInputScatters[0], trainingInputScatters[1],
-		// 	/*TODO: Pass decision boundary function*/):
-		// default:
-		// }
+		select {
+		case img <- Plot(PosScatter, NegScatter,
+			/*TODO: Pass decision boundary function*/):
+		default:
+		}
 		fmt.Printf("Epoch: %v\n\n", epoch)
 		// fmt.Printf("Weights:\nws = %v\nb = %v\n\n", w, b)
 		fmt.Printf("Derivatives:\nws = %v\nb = %v\n\n", dw, db)
@@ -45,9 +45,9 @@ func main() {
 		fmt.Printf("Weights:\nws = %v\nb = %v\n\n", w, b)
 	}
 
-	// }()
+	}()
 
-	// if err := ebiten.RunGame(&App{Img: img}); err != nil {
-	// 	log.Fatal(err)
-	// }
+	if err := ebiten.RunGame(&App{Img: img}); err != nil {
+		log.Fatal(err)
+	}
 }

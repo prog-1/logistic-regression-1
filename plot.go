@@ -10,10 +10,6 @@ import (
 	"gonum.org/v1/plot/vg/vgimg"
 )
 
-const (
-	screenHeight, screenWidth = 720, 480
-)
-
 func Plot(ps ...plot.Plotter) *image.RGBA {
 	p := plot.New()
 	p.Add(append([]plot.Plotter{
