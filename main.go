@@ -1,7 +1,13 @@
 package main
 
 import (
+	"encoding/csv"
+	"fmt"
+	"io"
 	"math"
+	"math/rand"
+	"os"
+	"strconv"
 )
 
 func sigmoid(z float64) float64 {
@@ -34,11 +40,83 @@ func dCost(inputs [][]float64, y, p []float64) (dw []float64, db float64) {
 	return
 }
 
+func shuffle(inputs [][]float64, y []float64) {
+	for i := range inputs {
+		if len(inputs)-i == 0 {
+			return
+		}
+		t := rand.Intn(len(inputs) - i)
+		inputs[i], inputs[i+t] = inputs[i+t], inputs[i]
+		y[i], y[i+t] = y[i+t], y[i]
+	}
+}
+
+func split(inputs [][]float64, y []float64) (xTrain, xTest [][]float64, yTrain, yTest []float64) {
+	for i := range inputs {
+		if i%4 == 0 {
+			xTest = append(xTest, inputs[i])
+			yTest = append(yTest, y[i])
+		} else {
+			xTrain = append(xTrain, inputs[i])
+			yTrain = append(yTrain, y[i])
+
+		}
+	}
+	return
+}
+
+func Round(a float64) float64 {
+	if a < 0.5 {
+		return 0
+	}
+	if a >= 0.5 {
+		return 1
+	}
+	panic("Your computer is broken")
+}
+
+func accuracy(inputs [][]float64, y []float64, w []float64, b float64) float64 {
+	success := 0
+	res := inference(inputs, w, b)
+	for i := range res {
+		if Round(res[i]) == y[i] {
+			success++
+		}
+	}
+	return float64(success) / float64(len(res))
+}
+
 func main() {
-	m := model{[]float64{0, 0, 0}, 0}
-	m.Train([][]float64{
-		[]float64{1, 2, 3},
-		[]float64{1, -2, 3},
-		[]float64{-1, 2, -3},
-	}, []float64{0.8021838885585817481543435915519132375077833237084304443062099967, 0.6456563062257954529091106364118829640767984024588060872071562097, 0.3543436937742045470908893635881170359232015975411939127928437902}, 1e-4, 1e-4, 1000000)
+	dataset := make([][]float64, 0)
+	res := make([]float64, 0)
+	file, err := os.Open("data/exams1.csv")
+
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer file.Close()
+
+	reader := csv.NewReader(file)
+
+	for {
+		record, err := reader.Read()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			fmt.Println(err)
+			continue
+		}
+		a, _ := strconv.ParseFloat(record[0], 64)
+		b, _ := strconv.ParseFloat(record[1], 64)
+		c, _ := strconv.ParseFloat(record[2], 64)
+		dataset = append(dataset, []float64{a, b})
+		res = append(res, c)
+	}
+	shuffle(dataset, res)
+
+	xTrain, xTest, yTrain, yTest := split(dataset, res)
+	m := model{[]float64{0, 0}, 0}
+	m.Train(xTrain, yTrain, 1e-3, 1e-2, 10000000, xTest, yTest)
 }
