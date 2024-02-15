@@ -14,6 +14,7 @@ const (
 	classCount    = 2
 )
 
+// TODO: Make it present only in this file, with no dependancies in other files
 // Implementes plotter's XYer interface
 type Inputs [][argumentCount]float64
 
@@ -64,7 +65,7 @@ func splitTrainingSet(xs Inputs, ys []float64) (PosXS, NegXS Inputs, err error) 
 	}
 
 	for i, x := range xs {
-		if ys[i] != 1 || ys[i] != 0 { // Needs to strictly match, so comparison with == is presumably valid
+		if ys[i] != 1 && ys[i] != 0 { // Needs to strictly match, so comparison with == is presumably valid
 			return nil, nil, fmt.Errorf("ys[%v] ∉ {0,1}", i)
 		}
 		if ys[i] == 1 {

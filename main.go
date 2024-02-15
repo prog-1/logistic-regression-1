@@ -1,48 +1,73 @@
 package main
 
 import (
-	"errors"
 	"fmt"
-	"image"
 	"log"
 )
 
+const (
+	epochCount   = 1e5
+	learningRate = 1e-3
+)
+
 // sinkingCondition() defines in what case sink() is executed
-func train(xs Inputs, ys []float64, sinkingCondition func(epoch int) bool, sink func(epoch int, weights, derivatives WeightRelated)) (weights WeightRelated, err error) {
+func train(epochCount int, xs Inputs, ys []float64, learningRate float64, sink func(epoch int, weights, derivatives WeightRelated)) (weights WeightRelated, err error) {
 	if len(xs) < 1 {
-		return weights, errors.New("No training examples provided")
+		// return weights, errors.New("no training examples provided")
+		panic("no training examples provided")
 	}
-	// m := len(xs)    // number of training examples
-	// n := len(xs[0]) // number of features
+
+	// weights = RandWeights()
+	var derivatives WeightRelated
+	for epoch := 0; epoch < epochCount; epoch++ {
+		derivatives = dCost(xs, ys, inference(xs, weights))
+		weights.adjustWeights(&derivatives, learningRate)
+		sink(epoch, weights, derivatives)
+	}
 
 	return weights, nil
 }
 
 func main() {
 	xs, ys := readExams1()
-	img := make(chan *image.RGBA, 1)
-	PosXS, NegXS, err := splitTrainingSet(xs, ys)
-	if err != nil {
-		log.Fatal(err)
-	}
-	trainingInputScatters, err := trainingInputScatters(PosXS, NegXS)
-	if err != nil {
-		log.Fatal(err)
-	}
+	// PosXS, NegXS, err := splitTrainingSet(xs, ys)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// trainingInputScatters, err := trainingInputScatters(PosXS, NegXS)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
 
-	if weights, err := train(xs, ys, func(epoch int) bool { return epoch%1000 == 0 }, func(epoch int, weights, derivatives WeightRelated) {
-		select {
-		case img <- Plot(trainingInputScatters[0], trainingInputScatters[1],
-			/*TODO: Pass categorisation division function*/):
-		default:
+	// var learningRates WeightRelated = WeightRelated{
+	// 	ws: [argumentCount]float64{1e-2, 1e-2},
+	// 	b:  5e-3,
+	// }
+
+	// img := make(chan *image.RGBA, 1)
+	// go func() {
+	if weights, err := train(epochCount, xs, ys, learningRate, func(epoch int, weights, derivatives WeightRelated) {
+		if epoch%1e4 != 0 {
+			return
 		}
+		// select {
+		// case img <- Plot(trainingInputScatters[0], trainingInputScatters[1],
+		// 	/*TODO: Pass decision boundary function*/):
+		// default:
+		// }
 		fmt.Printf("Epoch: %v\n\n", epoch)
-		fmt.Printf("Weights:\nw0 = %v, ws = %v\nb = %v, bws = %v\n\n", weights.ws, weights.ws, weights.b, weights.bws)
-		fmt.Printf("Derivatives:\nw0 = %v, ws = %v\nb = %v, bws = %v\n\n", derivatives.w0, derivatives.ws, derivatives.b, derivatives.bws)
+		// fmt.Printf("Weights:\nws = %v\nb = %v\n\n", weights.ws, weights.b)
+		fmt.Printf("Derivatives:\nws = %v\nb = %v\n\n", derivatives.ws, derivatives.b)
 		fmt.Println()
 	}); err != nil {
 		log.Fatal(err)
 	} else {
-		fmt.Println(weights)
+		fmt.Printf("Weights:\nws = %v\nb = %v\n\n", weights.ws, weights.b)
 	}
+
+	// }()
+
+	// if err := ebiten.RunGame(&App{Img: img}); err != nil {
+	// 	log.Fatal(err)
+	// }
 }

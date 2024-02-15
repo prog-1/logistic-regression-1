@@ -2,11 +2,37 @@ package main
 
 import (
 	"math"
+	"math/rand"
 )
 
+const (
+	randMin, randMax = 1500, 2000
+)
+
+// TODO: Remove this
 type WeightRelated struct {
 	ws [argumentCount]float64
 	b  float64
+}
+
+func (weights *WeightRelated) adjustWeights(derivatives *WeightRelated, learningRate float64) {
+	weights.b -= derivatives.b * 0.5
+	for i := range weights.ws {
+		weights.ws[i] -= derivatives.ws[i] * learningRate
+	}
+}
+
+func RandWeights() WeightRelated {
+	RandFloat := func() float64 {
+		return randMin + rand.Float64()*(randMax-randMin)
+	}
+	RandArr := func() (arr [argumentCount]float64) {
+		for i := 0; i < argumentCount; i++ {
+			arr[i] = RandFloat()
+		}
+		return arr
+	}
+	return WeightRelated{ws: RandArr(), b: RandFloat()}
 }
 
 func sigmoid(z float64) float64 {
@@ -24,28 +50,27 @@ func prediction(x []float64, w []float64, b float64) float64 {
 	return sigmoid(dot(w, x) + b)
 }
 
-func inference(xs [][]float64, w []float64, b float64) (probabilities []float64) {
+func inference(xs Inputs, w []float64, b float64) (probabilities []float64) {
 	for _, x := range xs {
-		probabilities = append(probabilities, prediction(x, w, b))
+		probabilities = append(probabilities, prediction(x[:], w, b))
 	}
 	return probabilities
 }
 
-func dCost(xs [][]float64, y, p []float64) (dw []float64, db float64) {
-	if len(xs) == 0 {
-		return dw, db
-	}
-
+func dCost(xs Inputs, labels, y []float64) (dw, db []float64) {
+	var derivatives WeightRelated
 	var diff float64
 	m := float64(len(xs))
-	n := len(xs[0])
-	dw = make([]float64, n)
 	for i := range xs {
-		diff = p[i] - y[i]
-		for j := range dw {
-			dw[j] += 1 / m * diff * xs[i][j]
+		diff = y[i] - labels[i]
+		for j := range derivatives.ws {
+			derivatives.ws[j] += 1 / m * diff * xs[i][j]
 		}
-		db += 1 / m * diff
+		derivatives.b += 1 / m * diff
 	}
-	return dw, db
+	return derivatives
 }
+
+// func decisionBoundaryFunction(x1, x2 float64) func(float64) float64 {
+
+// }
