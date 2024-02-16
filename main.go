@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"math"
+	"math/rand"
 	"os"
 	"strconv"
 )
@@ -57,6 +58,30 @@ func gradientDescent(inputs [][]float64, y, w []float64, lr, b float64) ([]float
 	return w, b
 }
 
+func accuracy(inputs [][]float64, y []float64, w []float64, b float64) (acc float64) {
+	r := inference(inputs, w, b)
+	for i := range inputs {
+		if y[i] == math.Round(r[i]) {
+			acc++
+		}
+	}
+	return acc / float64(len(y))
+}
+
+func split(inputs [][]float64, y []float64) (xTrain, xTest [][]float64, yTrain, yTest []float64) {
+	size := len(inputs) / 5
+	return inputs[size:], inputs[:size], y[size:], y[:size]
+}
+
+func shuffle(inputs [][]float64, y []float64) (sInputs [][]float64, sY []float64) {
+	ind := rand.Perm(len(inputs))
+	sInputs, sY = make([][]float64, len(inputs)), make([]float64, len(y))
+	for i, j := range ind {
+		sInputs[i], sY[i] = inputs[j], y[j]
+	}
+	return sInputs, sY
+}
+
 func main() {
 	data, err := readDataFromCSV("data/exams1.csv")
 	if err != nil {
@@ -75,6 +100,8 @@ func main() {
 	lr := 0.01
 	b := 0.
 	fmt.Println(gradientDescent(inputs, y, w, lr, b))
+	sInputs, sY := shuffle(inputs, y)
+	fmt.Println(split(sInputs, sY))
 }
 
 type Student struct {

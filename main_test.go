@@ -2,6 +2,7 @@ package main
 
 import (
 	"math"
+	"reflect"
 	"testing"
 )
 
@@ -99,6 +100,72 @@ func TestDCost(t *testing.T) {
 		}
 		if math.Abs(got2-tc.want2) > 1e-6 {
 			t.Errorf("got2 = %v, want2 = %v", got2, tc.want2)
+		}
+	}
+}
+
+func TestAccuracy(t *testing.T) {
+	for _, tc := range []struct {
+		inputs  [][]float64
+		y, w    []float64
+		b, want float64
+	}{
+		{inputs: [][]float64{{10, 20}, {30, -50}, {5, 5}}, y: []float64{0, 1, 1}, w: []float64{0.1, 0.05}, b: 0.25, want: 0.666667},
+		{inputs: [][]float64{{10, 20}, {30, -50}, {5, 5}}, y: []float64{1, 1, 0}, w: []float64{0.1, 0.05}, b: 0.25, want: 0.666667},
+		{inputs: [][]float64{{10, 20}, {30, -50}, {5, 5}}, y: []float64{1, 1, 1}, w: []float64{0.1, 0.05}, b: 0.25, want: 1},
+		{inputs: [][]float64{{10, 20}, {30, -50}, {5, 5}}, y: []float64{0, 0, 1}, w: []float64{0.1, 0.05}, b: 0.25, want: 0.333333},
+		{inputs: [][]float64{{10, 20}, {30, -50}, {5, 5}}, y: []float64{1, 0, 0}, w: []float64{0.1, 0.05}, b: 0.25, want: 0.333333},
+		{inputs: [][]float64{{10, 20}, {30, -50}, {5, 5}}, y: []float64{0, 1, 0}, w: []float64{0.1, 0.05}, b: 0.25, want: 0.333333},
+		{inputs: [][]float64{{10, 20}, {30, -50}, {5, 5}}, y: []float64{0, 0, 0}, w: []float64{0.1, 0.05}, b: 0.25, want: 0},
+		{inputs: [][]float64{{10, 40, 25}, {0, 100, -300}}, y: []float64{1, 1}, w: []float64{0.05, 0.05, 0.02}, b: 0, want: 0.5},
+		{inputs: [][]float64{
+			{0, -1}, {0, 0}, {0, 1},
+			{-1, 1}, {-1, 0}, {-1, -1},
+			{1, 1}, {1, 0}, {1, -1}}, y: []float64{1, 1, 1, 0, 0, 1, 1, 1, 1}, w: []float64{1, 0}, b: 0, want: 0.888889},
+	} {
+		got := accuracy(tc.inputs, tc.y, tc.w, tc.b)
+		if math.Abs(got-tc.want) > 1e-6 {
+			t.Errorf("got = %v, want = %v", got, tc.want)
+		}
+	}
+}
+
+func TestSplit(t *testing.T) {
+	for _, tc := range []struct {
+		inputs, wantXT, wantXTest [][]float64
+		y, wantYT, wantYTest      []float64
+	}{
+		{inputs: [][]float64{{10, 13}, {3, 20}, {12, 15}, {30, 20}, {10, 10}, {3, 9}, {1, 1}, {2, 2}},
+			y:      []float64{1, 1, 1, 0, 1, 1, 1, 1},
+			wantXT: [][]float64{{3, 20}, {12, 15}, {30, 20}, {10, 10}, {3, 9}, {1, 1}, {2, 2}}, wantXTest: [][]float64{{10, 13}},
+			wantYT: []float64{1, 1, 0, 1, 1, 1, 1}, wantYTest: []float64{1}},
+
+		{inputs: [][]float64{{1, 5}, {2, 4}, {4, 10}, {20, 30}, {25, 43}, {40, 50}, {60, 60}, {65, 55}, {70, 80}, {90, 100}},
+			y:         []float64{1, 1, 1, 0, 1, 0, 1, 1, 0, 0},
+			wantXT:    [][]float64{{4, 10}, {20, 30}, {25, 43}, {40, 50}, {60, 60}, {65, 55}, {70, 80}, {90, 100}},
+			wantXTest: [][]float64{{1, 5}, {2, 4}},
+			wantYT:    []float64{1, 0, 1, 0, 1, 1, 0, 0},
+			wantYTest: []float64{1, 1}},
+
+		{inputs: [][]float64{{1, 5}, {2, 4}, {3, 10}, {20, 50}, {30, 60}},
+			y:         []float64{1, 0, 0, 0, 0},
+			wantXT:    [][]float64{{2, 4}, {3, 10}, {20, 50}, {30, 60}},
+			wantXTest: [][]float64{{1, 5}},
+			wantYT:    []float64{0, 0, 0, 0},
+			wantYTest: []float64{1}},
+	} {
+		gotXT, gotXTest, gotYT, gotYTest := split(tc.inputs, tc.y)
+		if !reflect.DeepEqual(gotXT, tc.wantXT) {
+			t.Errorf("gotXT = %v, wantXT = %v", gotXT, tc.wantXT)
+		}
+		if !reflect.DeepEqual(gotXTest, tc.wantXTest) {
+			t.Errorf("gotXTest = %v, wantXTest = %v", gotXTest, tc.wantXTest)
+		}
+		if !reflect.DeepEqual(gotYT, tc.wantYT) {
+			t.Errorf("gotYT = %v, wantYT = %v", gotYT, tc.wantYT)
+		}
+		if !reflect.DeepEqual(gotYTest, tc.wantYTest) {
+			t.Errorf("gotYTest = %v, wantYTest = %v", gotYTest, tc.wantYTest)
 		}
 	}
 }
