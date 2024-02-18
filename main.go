@@ -46,6 +46,7 @@ func main() {
 			log.Fatal(err)
 		} else {
 			fmt.Printf("\n\nWeights:\nws = %v\nb = %v\n\n", w, b)
+			fmt.Printf("\n\nAccuracy: %v\n\n", accuracy(inputs, ys, w, b))
 		}
 	}()
 
