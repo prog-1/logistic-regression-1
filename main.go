@@ -209,10 +209,9 @@ func main() {
 	plotData.grid = xTest
 	plotData.N = len(xTest)
 	plotData.M = len(xTest[0])
-	plotData.resolution = 1
-	plotData.minX = 20
-	plotData.minY = 20
-	plotData.Dims()
+	plotData.resolution = 50
+	plotData.minX = 0.2
+	plotData.minY = 25
 	pal := moreland.SmoothBlueRed().Palette(255)
 	heatmap := plotter.NewHeatMap(plotData, pal)
 	ph.Add(heatmap)
