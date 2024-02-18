@@ -67,11 +67,17 @@ func train(epochCount int, xs [][]float64, ys []float64, lrw, lrb float64, sink 
 	return w, b, nil
 }
 
-func decisionBoundaryFunction(w []float64, b float64) func(float64) float64 {
+func decisionBoundaryFunc(w []float64, b float64) func(float64) float64 {
 	if len(w) != 2 {
 		panic("more than 2 parameters in model")
 	}
 	return func(x float64) float64 {
 		return -(w[0]*x + b) / w[1]
 	}
+}
+
+// Takes the first ratio(%) as the testing set
+func split(inputs [][]float64, y []float64, ratio int) (xTrain, xTest [][]float64, yTrain, yTest []float64) {
+	testElCount := len(inputs) * ratio / 100
+	return inputs[testElCount:], inputs[:testElCount], y[testElCount:], y[:testElCount]
 }

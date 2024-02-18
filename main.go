@@ -29,7 +29,7 @@ func main() {
 		if epoch%1e4 != 0 {
 			return
 		}
-		dbf, err := plotter.NewLine(plotter.XYs{{X: x1min, Y: decisionBoundaryFunction(w, b)(x1min)}, {X: x1max, Y: decisionBoundaryFunction(w, b)(x1max)}})
+		dbf, err := plotter.NewLine(plotter.XYs{{X: x1min, Y: decisionBoundaryFunc(w, b)(x1min)}, {X: x1max, Y: decisionBoundaryFunc(w, b)(x1max)}})
 		if err != nil {
 			log.Fatal(err)
 		}

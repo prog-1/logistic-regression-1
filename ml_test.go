@@ -2,6 +2,7 @@ package main
 
 import (
 	"math"
+	"reflect"
 	"testing"
 )
 
@@ -105,6 +106,44 @@ func TestDCost(t *testing.T) {
 		got.dw, got.db = dCost(tc.input.xs, tc.input.y, tc.input.p)
 		if !nearlyEqualOutput(got, tc.want, eps) {
 			t.Errorf("dCost(%v) = %v, want = %v", tc.input, got, tc.want)
+		}
+	}
+}
+
+func TestSplit(t *testing.T) {
+	type Input struct {
+		inputs [][]float64
+		y      []float64
+		ratio  int
+	}
+	type Output struct {
+		xTrain, xTest [][]float64
+		yTrain, yTest []float64
+	}
+	for _, tc := range []struct {
+		input Input
+		want  Output
+	}{
+		{input: Input{}, want: Output{}},
+		{input: Input{inputs: [][]float64{{1, 10}, {10, 1}}, y: []float64{0, 1}, ratio: 50},
+			want: Output{xTrain: [][]float64{{10, 1}}, xTest: [][]float64{{1, 10}}, yTrain: []float64{1}, yTest: []float64{0}}},
+		{input: Input{inputs: [][]float64{{1, 10}, {10, 1}}, y: []float64{0, 1}, ratio: 0},
+			want: Output{xTrain: [][]float64{{1, 10}, {10, 1}}, xTest: [][]float64{}, yTrain: []float64{0, 1}, yTest: []float64{}}},
+		{input: Input{inputs: [][]float64{{1, 10}, {10, 1}}, y: []float64{0, 1}, ratio: 100},
+			want: Output{xTrain: [][]float64{}, xTest: [][]float64{{1, 10}, {10, 1}}, yTrain: []float64{}, yTest: []float64{0, 1}}},
+		{input: Input{inputs: [][]float64{{1, 2}, {3, 4}, {5, 6}, {7, 8}, {9, 10}}, y: []float64{1, 0, 1, 0, 0}, ratio: 20}, // (c) Sebastjans Peive
+			want: Output{xTrain: [][]float64{{3, 4}, {5, 6}, {7, 8}, {9, 10}}, xTest: [][]float64{{1, 2}}, yTrain: []float64{0, 1, 0, 0}, yTest: []float64{1}}},
+	} {
+		var got Output
+		got.xTrain, got.xTest, got.yTrain, got.yTest = split(tc.input.inputs, tc.input.y, tc.input.ratio)
+		if !reflect.DeepEqual(tc.want.xTrain, got.xTrain) {
+			t.Errorf("got.xTrain = %v, want.xTrain %v", got.xTrain, tc.want.xTrain)
+		} else if !reflect.DeepEqual(tc.want.xTest, got.xTest) {
+			t.Errorf("got.xTest = %v, want.xTest = %v", got.xTest, tc.want.xTest)
+		} else if !reflect.DeepEqual(tc.want.yTrain, got.yTrain) {
+			t.Errorf("got.yTrain = %v, want.yTrain %v", got.yTrain, tc.want.yTrain)
+		} else if !reflect.DeepEqual(tc.want.yTest, got.yTest) {
+			t.Errorf("got.yTest = %v, want.yTest %v", got.yTest, tc.want.yTest)
 		}
 	}
 }
