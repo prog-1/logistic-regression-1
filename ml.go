@@ -82,11 +82,12 @@ func split(inputs [][]float64, y []float64, ratio int) (xTrain, xTest [][]float6
 	return inputs[testElCount:], inputs[:testElCount], y[testElCount:], y[:testElCount]
 }
 
-func accuracy(inputs [][]float64, y []float64, w []float64, b float64) (accuracyScore float64) {
+func accuracy(inputs [][]float64, y []float64, w []float64, b float64) float64 {
+	var correctCount float64
 	for i, x := range inputs {
 		if y[i] == math.Round(prediction(x, w, b)) {
-			accuracyScore++
+			correctCount++
 		}
 	}
-	return accuracyScore / float64(len(inputs))
+	return correctCount / float64(len(inputs))
 }
