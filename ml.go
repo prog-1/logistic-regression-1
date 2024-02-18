@@ -23,21 +23,21 @@ func prediction(x []float64, w []float64, b float64) float64 {
 	return sigmoid(dot(w, x) + b)
 }
 
-func inference(xs [][]float64, w []float64, b float64) (probabilities []float64) {
-	for _, x := range xs {
+func inference(inputs [][]float64, w []float64, b float64) (probabilities []float64) {
+	for _, x := range inputs {
 		probabilities = append(probabilities, prediction(x, w, b))
 	}
 	return probabilities
 }
 
-func dCost(xs [][]float64, labels, y []float64) (dw []float64, db float64) {
+func dCost(inputs [][]float64, labels, y []float64) (dw []float64, db float64) {
 	dw = make([]float64, argumentCount)
 	var diff float64
-	m := float64(len(xs))
-	for i := range xs {
+	m := float64(len(inputs))
+	for i := range inputs {
 		diff = y[i] - labels[i]
 		for j := range dw {
-			dw[j] += 1 / m * diff * xs[i][j]
+			dw[j] += 1 / m * diff * inputs[i][j]
 		}
 		db += 1 / m * diff
 		// Usually do: diff = label - prediction; derivative -= ...
@@ -45,15 +45,15 @@ func dCost(xs [][]float64, labels, y []float64) (dw []float64, db float64) {
 	return dw, db
 }
 
-func train(epochCount int, xs [][]float64, ys []float64, lrw, lrb float64, sink func(epoch int, w, dw []float64, b, db float64)) (w []float64, b float64, err error) {
-	if len(xs) < 1 {
+func train(epochCount int, inputs [][]float64, ys []float64, lrw, lrb float64, sink func(epoch int, w, dw []float64, b, db float64)) (w []float64, b float64, err error) {
+	if len(inputs) < 1 {
 		// return weights, errors.New("no training examples provided")
 		panic("no training examples provided")
 	}
 
 	w = make([]float64, argumentCount)
 	for epoch := 0; epoch < epochCount; epoch++ {
-		dw, db := dCost(xs, ys, inference(xs, w, b))
+		dw, db := dCost(inputs, ys, inference(inputs, w, b))
 
 		// Adjusting weights
 		b -= db * lrb

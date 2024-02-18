@@ -77,8 +77,8 @@ func TestInference(t *testing.T) {
 
 func TestDCost(t *testing.T) {
 	type Input struct {
-		xs   [][]float64
-		y, p []float64
+		inputs [][]float64
+		y, p   []float64
 	}
 	type Output struct {
 		dw []float64
@@ -103,7 +103,7 @@ func TestDCost(t *testing.T) {
 		{input: Input{[][]float64{{1, 2}, {2, 7}}, []float64{3, 9}, []float64{3, 9}}, want: Output{[]float64{0, 0}, 0}}, // Complete match
 	} {
 		var got Output
-		got.dw, got.db = dCost(tc.input.xs, tc.input.y, tc.input.p)
+		got.dw, got.db = dCost(tc.input.inputs, tc.input.y, tc.input.p)
 		if !nearlyEqualOutput(got, tc.want, eps) {
 			t.Errorf("dCost(%v) = %v, want = %v", tc.input, got, tc.want)
 		}
@@ -147,3 +147,9 @@ func TestSplit(t *testing.T) {
 		}
 	}
 }
+
+// func TestAccuracy(t *testing.T) {
+// 	type Input struct {
+// 		inputs [][]float64, y []float64, w []float64, b float64
+// 	}
+// }

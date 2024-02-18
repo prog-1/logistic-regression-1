@@ -16,7 +16,7 @@ const (
 )
 
 // Reads data from data/exams1.csv and returns [][argumentCount]float64 with labels
-func ReadExams1() (xs [][]float64, ys []float64) {
+func ReadExams1() (inputs [][]float64, ys []float64) {
 	parseRow := func(row []string) error {
 		if len(row) != argumentCount+1 {
 			return fmt.Errorf("row length != %v", argumentCount+1)
@@ -36,26 +36,26 @@ func ReadExams1() (xs [][]float64, ys []float64) {
 			return err
 		}
 
-		xs, ys = append(xs, x), append(ys, y)
+		inputs, ys = append(inputs, x), append(ys, y)
 
 		return nil
 	}
 	if err := readCSV("data/exams1.csv", parseRow); err != nil {
 		log.Fatal(err)
 	}
-	return xs, ys
+	return inputs, ys
 }
 
 // Returns input vector plotters separated by label value(1 or 0)
 // Assumes having only 2 classes: 1 and 0
-func trainingInputScatters(xs [][]float64, ys []float64, PosScatterColor, NegScatterColor color.RGBA) (PosScatter, NegScatter *plotter.Scatter, err error) {
-	if len(xs) != len(ys) {
-		return PosScatter, NegScatter, errors.New("len(xs) != len(ys)")
+func trainingInputScatters(inputs [][]float64, ys []float64, PosScatterColor, NegScatterColor color.RGBA) (PosScatter, NegScatter *plotter.Scatter, err error) {
+	if len(inputs) != len(ys) {
+		return PosScatter, NegScatter, errors.New("len(inputs) != len(ys)")
 	}
 
 	// Splitting input
 	var PosXS, NegXS plotter.XYs
-	for i, x := range xs {
+	for i, x := range inputs {
 		if ys[i] != 1 && ys[i] != 0 { // Needs to strictly match, so comparison with == is presumably valid
 			return PosScatter, NegScatter, fmt.Errorf("ys[%v] ∉ {0,1}", i)
 		}

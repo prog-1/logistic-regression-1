@@ -18,8 +18,8 @@ const (
 )
 
 func main() {
-	xs, ys := ReadExams1()
-	posScatter, negScatter, err := trainingInputScatters(xs, ys, color.RGBA{0, 255, 0, 255}, color.RGBA{255, 0, 0, 255})
+	inputs, ys := ReadExams1()
+	posScatter, negScatter, err := trainingInputScatters(inputs, ys, color.RGBA{0, 255, 0, 255}, color.RGBA{255, 0, 0, 255})
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -42,7 +42,7 @@ func main() {
 		fmt.Println()
 	}
 	go func() {
-		if w, b, err := train(epochCount, xs, ys, lrw, lrb, sink); err != nil {
+		if w, b, err := train(epochCount, inputs, ys, lrw, lrb, sink); err != nil {
 			log.Fatal(err)
 		} else {
 			fmt.Printf("\n\nWeights:\nws = %v\nb = %v\n\n", w, b)
