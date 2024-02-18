@@ -11,6 +11,7 @@ import (
 	"strconv"
 
 	"gonum.org/v1/plot"
+	"gonum.org/v1/plot/palette/moreland"
 	"gonum.org/v1/plot/plotter"
 	"gonum.org/v1/plot/vg"
 )
@@ -117,6 +118,15 @@ func split(data [][]string) (xTrain, xTest [][]float64, yTrain, yTest []float64)
 	return xTrain, xTest, yTrain, yTest
 }
 
+type plottable struct {
+	grid       [][]float64
+	N          int
+	M          int
+	resolution float64
+	minX       float64
+	minY       float64
+}
+
 func main() {
 	//reading
 	file, err := os.Open("data/exams1.csv")
@@ -188,4 +198,37 @@ func main() {
 	if err := p.Save(4*vg.Inch, 4*vg.Inch, "scatter.png"); err != nil {
 		panic(err)
 	}
+	// draw heatmap
+	// special thanks to
+	//https://medium.com/@balazs.dianiska/generating-heatmaps-with-go-83988b22c000
+	// The only question is
+	// what does the heatmap show?
+	// how to tweak values for the best result?
+	ph := plot.New()
+	var plotData plottable
+	plotData.grid = xTest
+	plotData.N = len(xTest)
+	plotData.M = len(xTest[0])
+	plotData.resolution = 1
+	plotData.minX = 20
+	plotData.minY = 20
+	plotData.Dims()
+	pal := moreland.SmoothBlueRed().Palette(255)
+	heatmap := plotter.NewHeatMap(plotData, pal)
+	ph.Add(heatmap)
+	if err := ph.Save(4*vg.Inch, 4*vg.Inch, "heatmap.png"); err != nil {
+		panic(err)
+	}
+}
+func (p plottable) Dims() (c, r int) {
+	return p.N, p.M
+}
+func (p plottable) X(c int) float64 {
+	return p.minX + float64(c)*p.resolution
+}
+func (p plottable) Y(r int) float64 {
+	return p.minY + float64(r)*p.resolution
+}
+func (p plottable) Z(c, r int) float64 {
+	return p.grid[c][r]
 }
