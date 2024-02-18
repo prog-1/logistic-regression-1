@@ -148,8 +148,23 @@ func TestSplit(t *testing.T) {
 	}
 }
 
-// func TestAccuracy(t *testing.T) {
-// 	type Input struct {
-// 		inputs [][]float64, y []float64, w []float64, b float64
-// 	}
-// }
+func TestAccuracy(t *testing.T) {
+	type Input struct {
+		inputs [][]float64
+		y      []float64
+		w      []float64
+		b      float64
+	}
+	for _, tc := range []struct {
+		input Input
+		want  float64
+	}{
+		{Input{inputs: [][]float64{{1, 1}, {2, 2}, {3, 3}, {4, 4}, {5, 5}}, y: []float64{1, 1, 1, 1, 1}, w: []float64{1, 1}, b: 1}, 1},
+		{Input{inputs: [][]float64{{1, 1}, {2, 2}, {3, 3}, {4, 4}, {5, 5}}, y: []float64{0, 0, 0, 0, 0}, w: []float64{1, 1}, b: 1}, 0},
+		{Input{inputs: [][]float64{{1, 1}, {2, 2}, {3, 3}, {4, 4}, {5, 5}, {6, 6}}, y: []float64{1, 1, 1, 0, 0, 0}, w: []float64{1, 1}, b: 1}, 0.5},
+	} {
+		if got := accuracy(tc.input.inputs, tc.input.y, tc.input.w, tc.input.b); !nearlyEqualFloat(got, tc.want, eps) {
+			t.Errorf("accuracy(%v) = %v, want = %v", tc.input, got, tc.want)
+		}
+	}
+}
