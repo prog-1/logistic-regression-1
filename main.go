@@ -14,7 +14,7 @@ const (
 	epochCount                = 1e6
 	lrw, lrb                  = 1e-3, 0.5
 	x1min, x1max              = 0, 100
-	screenHeight, screenWidth = 720, 480
+	screenWidth, screenHeight = 720, 480
 )
 
 func main() {
