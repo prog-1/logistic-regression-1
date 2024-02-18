@@ -2,18 +2,16 @@ package main
 
 import (
 	"encoding/csv"
-	"image/color"
-	"image"
 	"fmt"
+	"image/color"
 	"log"
 	"math"
 	"math/rand"
 	"os"
 	"strconv"
+
 	"gonum.org/v1/plot"
 	"gonum.org/v1/plot/plotter"
-	"gonum.org/v1/plot/vg/draw"
-	"gonum.org/v1/plot/vg/vgimg"
 	"gonum.org/v1/plot/vg"
 )
 
@@ -87,9 +85,8 @@ func accuracy(inputs [][]float64, y []float64, w []float64, b float64) float64 {
 	return (truePos + trueNeg) / (truePos + trueNeg + falsePos + falseNeg)
 }
 
-func split(data [][]string) (xTrain, xTest [][]float64, yTrain, yTest []float64, draw plotter.XYs) {
+func split(data [][]string) (xTrain, xTest [][]float64, yTrain, yTest []float64) {
 	half := len(data) / 2
-	draw = make(plotter.XYs, half)
 	segment := len(data[0])
 	xTrain = make([][]float64, half)
 	for i := range xTrain {
@@ -113,13 +110,11 @@ func split(data [][]string) (xTrain, xTest [][]float64, yTrain, yTest []float64,
 	for i, row := range data[half:] {
 		for j := 0; j < 2; j++ {
 			xTest[i][j], _ = strconv.ParseFloat(row[j], 64)
-			draw[i].X, _ = strconv.ParseFloat(row[0], 64)
-			draw[i].Y, _ = strconv.ParseFloat(row[1], 64)
 		}
 		yTest[i], _ = strconv.ParseFloat(row[2], 64)
 	}
 	//fmt.Println(xTrain, xTest, yTrain, yTest)
-	return xTrain, xTest, yTrain, yTest, draw
+	return xTrain, xTest, yTrain, yTest
 }
 
 func main() {
@@ -138,12 +133,12 @@ func main() {
 	p := plot.New()
 	var dw []float64
 	var db float64
-	xTrain, xTest, yTrain, yTest, draw := split(data)
+	xTrain, xTest, yTrain, yTest := split(data)
 	w := make([]float64, len(xTrain[0]))
 	for i := range w {
-		w[i] = rand.Float64()*2
+		w[i] = rand.Float64() * 2
 	}
-	b := rand.Float64() *2
+	b := rand.Float64() * 2
 	alpha := 1e-3
 	epochs := 100000
 	// Output formatting
@@ -155,31 +150,42 @@ func main() {
 	score := accuracy(xTest, yTest, w, b)
 	fmt.Printf("Score: %v\n", score)
 	// drawing
-	scatter, err := plotter.NewScatter(draw)
+	var drawR, drawG plotter.XYs
+	for i := 0; i < len(yTrain); i++ {
+		if yTrain[i] == 0 {
+			drawR = append(drawR, struct{ X, Y float64 }{X: xTrain[i][0], Y: xTrain[i][1]})
+		} else {
+			drawG = append(drawG, struct{ X, Y float64 }{X: xTrain[i][0], Y: xTrain[i][1]})
+		}
+	}
+
+	scatterR, err := plotter.NewScatter(drawR)
 	if err != nil {
 		panic(err)
 	}
-	scatter.GlyphStyle.Color = color.RGBA{R: 255, A: 255}
-	scatter.GlyphStyle.Radius = vg.Points(4)
-	// Add the scatter plot to the plot and set the axes labels
-	p.Add(scatter)
+	scatterR.GlyphStyle.Color = color.RGBA{R: 255, A: 255}
+	scatterR.GlyphStyle.Radius = vg.Points(4)
+	p.Add(scatterR)
+
+	scatterG, err := plotter.NewScatter(drawG)
+	if err != nil {
+		panic(err)
+	}
+	scatterG.GlyphStyle.Color = color.RGBA{G: 255, A: 255}
+	scatterG.GlyphStyle.Radius = vg.Points(4)
+	p.Add(scatterG)
+
+	line, _ := plotter.NewLine(plotter.XYs{
+		{X: 20, Y: (-w[0]*20 - b) / w[1]},
+		{X: 100, Y: (-w[0]*100 - b) / w[1]}})
+	line.Color = color.RGBA{B: 255, A: 255}
+	p.Add(line)
+
 	p.Title.Text = "LOGistic regression"
 	p.X.Label.Text = "exam1"
 	p.Y.Label.Text = "exam2"
 
-// Save the plot to a PNG file
-if err := p.Save(4*vg.Inch, 4*vg.Inch, "scatter.png"); err != nil {
-    panic(err)
-}
-}
-
-func Plot(ps ...plot.Plotter) *image.RGBA {
-	p := plot.New()
-	p.Add(append([]plot.Plotter{
-		plotter.NewGrid(),
-	}, ps...)...)
-	img := image.NewRGBA(image.Rect(0, 0, 640, 480))
-	c := vgimg.NewWith(vgimg.UseImage(img))
-	p.Draw(draw.New(c))
-	return c.Image().(*image.RGBA)
+	if err := p.Save(4*vg.Inch, 4*vg.Inch, "scatter.png"); err != nil {
+		panic(err)
+	}
 }
