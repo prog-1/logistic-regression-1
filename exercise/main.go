@@ -46,3 +46,15 @@ func dCost(inputs [][]float64, y, p []float64) (dw []float64, db float64) {
 	}
 	return dw, db
 }
+
+func gradientDescent(w []float64, b float64, input [][]float64, y []float64) ([]float64, float64) {
+	predictions := inference(input, w, b)
+	dw, db := dCost(input, y, predictions)
+
+	for feature := range w {
+		w[feature] -= dw[feature] * 0.000001
+	}
+	b -= db * 5
+
+	return w, b
+}
