@@ -151,7 +151,7 @@ func TestSplit(t *testing.T) {
 	}
 	yTestExpected := []float64{9, 12}
 
-	xTrain, xTest, yTrain, yTest := split(data)
+	xTrain, xTest, _, yTrain, yTest := split(data)
 
 	if !reflect.DeepEqual(xTrain, xTrainExpected) {
 		t.Errorf("Expected xTrain to be %v, but got %v", xTrainExpected, xTrain)

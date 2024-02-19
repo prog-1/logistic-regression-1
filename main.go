@@ -86,7 +86,7 @@ func accuracy(inputs [][]float64, y []float64, w []float64, b float64) float64 {
 	return (truePos + trueNeg) / (truePos + trueNeg + falsePos + falseNeg)
 }
 
-func split(data [][]string) (xTrain, xTest [][]float64, yTrain, yTest []float64) {
+func split(data [][]string) (xTrain, xTest, kapusta [][]float64, yTrain, yTest []float64) {
 	half := len(data) / 2
 	segment := len(data[0])
 	xTrain = make([][]float64, half)
@@ -114,8 +114,21 @@ func split(data [][]string) (xTrain, xTest [][]float64, yTrain, yTest []float64)
 		}
 		yTest[i], _ = strconv.ParseFloat(row[2], 64)
 	}
+
+	kapusta = make([][]float64, len(data))
+	for i := range data {
+		kapusta[i] = make([]float64, segment)
+	}
+	// kapusta = data[0] + data[1], y
+	for i := range data {
+		kapusta[i][0], _ = strconv.ParseFloat(data[i][0], 64)
+		a, _ := strconv.ParseFloat(data[i][1], 64)
+		kapusta[i][0] = a
+		kapusta[i][2], _ = strconv.ParseFloat(data[i][2], 64)
+	}
+
 	//fmt.Println(xTrain, xTest, yTrain, yTest)
-	return xTrain, xTest, yTrain, yTest
+	return xTrain, xTest, kapusta, yTrain, yTest
 }
 
 type plottable struct {
@@ -143,7 +156,7 @@ func main() {
 	p := plot.New()
 	var dw []float64
 	var db float64
-	xTrain, xTest, yTrain, yTest := split(data)
+	xTrain, xTest, _, yTrain, yTest := split(data)
 	w := make([]float64, len(xTrain[0]))
 	for i := range w {
 		w[i] = rand.Float64() * 2
@@ -204,14 +217,15 @@ func main() {
 	// The only question is
 	// what does the heatmap show?
 	// how to tweak values for the best result?
+	// kapusta?
 	ph := plot.New()
 	var plotData plottable
 	plotData.grid = xTest
 	plotData.N = len(xTest)
 	plotData.M = len(xTest[0])
-	plotData.resolution = 50
-	plotData.minX = 0.2
-	plotData.minY = 25
+	plotData.resolution = 0.9
+	plotData.minX = 25
+	plotData.minY = 0
 	pal := moreland.SmoothBlueRed().Palette(255)
 	heatmap := plotter.NewHeatMap(plotData, pal)
 	ph.Add(heatmap)
