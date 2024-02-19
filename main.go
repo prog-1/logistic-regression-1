@@ -15,11 +15,14 @@ const (
 	lrw, lrb                  = 1e-3, 0.5
 	x1min, x1max              = 0, 100
 	screenWidth, screenHeight = 720, 480
+	testingSetRatio           = 20
 )
 
 func main() {
 	inputs, ys := ReadExams1()
-	posScatter, negScatter, err := trainingInputScatters(inputs, ys, color.RGBA{0, 255, 0, 255}, color.RGBA{255, 0, 0, 255})
+	xTrain, xTest, yTrain, yTest := split(inputs, ys, testingSetRatio)
+
+	posScatter, negScatter, err := trainingInputScatters(xTrain, yTrain, color.RGBA{0, 255, 0, 255}, color.RGBA{255, 0, 0, 255})
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -42,11 +45,11 @@ func main() {
 		fmt.Println()
 	}
 	go func() {
-		if w, b, err := train(epochCount, inputs, ys, lrw, lrb, sink); err != nil {
+		if w, b, err := train(epochCount, xTrain, yTrain, lrw, lrb, sink); err != nil {
 			log.Fatal(err)
 		} else {
 			fmt.Printf("\n\nWeights:\nws = %v\nb = %v\n\n", w, b)
-			fmt.Printf("\n\nAccuracy: %v\n\n", accuracy(inputs, ys, w, b))
+			fmt.Printf("\n\nAccuracy: %v\n\n", accuracy(xTest, yTest, w, b))
 		}
 	}()
 
