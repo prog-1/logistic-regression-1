@@ -138,7 +138,7 @@ type plottable struct {
 	resolution float64
 	minX       float64
 	minY       float64
-}
+}// add dependance on y
 
 func main() {
 	//reading
@@ -224,7 +224,7 @@ func main() {
 	plotData.N = len(xTest)
 	plotData.M = len(xTest[0])
 	plotData.resolution = 0.9
-	plotData.minX = 25
+	plotData.minX = 1
 	plotData.minY = 0
 	pal := moreland.SmoothBlueRed().Palette(255)
 	heatmap := plotter.NewHeatMap(plotData, pal)
@@ -245,3 +245,6 @@ func (p plottable) Y(r int) float64 {
 func (p plottable) Z(c, r int) float64 {
 	return p.grid[c][r]
 }
+//Todo:
+// you can shufffle indexes to get random train and test data
+// plotter.countermap
