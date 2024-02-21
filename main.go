@@ -30,9 +30,6 @@ func main() {
 
 	img := make(chan *image.RGBA, 1)
 	sink := func(epoch int, w, dw []float64, b, db float64) {
-		if epoch%1e4 != 0 {
-			return
-		}
 		dbf, err := plotter.NewLine(plotter.XYs{{X: x1min, Y: decisionBoundaryFunc(w, b)(x1min)}, {X: x1max, Y: decisionBoundaryFunc(w, b)(x1max)}})
 		if err != nil {
 			log.Fatal(err)
@@ -41,9 +38,11 @@ func main() {
 		case img <- Plot(posScatter, negScatter, dbf):
 		default:
 		}
-		fmt.Printf("Epoch: %v\n\n", epoch)
-		fmt.Printf("Derivatives:\nws = %v\nb = %v\n\n", dw, db)
-		fmt.Println()
+		if epoch%1e4 == 0 {
+			fmt.Printf("Epoch: %v\n\n", epoch)
+			fmt.Printf("Derivatives:\nws = %v\nb = %v\n\n", dw, db)
+			fmt.Println()
+		}
 	}
 	go func() {
 		if w, b, err := train(epochCount, xTrain, yTrain, lrw, lrb, sink); err != nil {
