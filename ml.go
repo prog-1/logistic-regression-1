@@ -2,6 +2,7 @@ package main
 
 import (
 	"math"
+	"math/rand"
 )
 
 const (
@@ -12,15 +13,18 @@ func sigmoid(z float64) float64 {
 	return 1 / (1 + math.Exp(-z))
 }
 
-func dot(a []float64, b []float64) (res float64) {
+func dot(a, b []float64) (res float64) {
+	if len(a) != len(b) {
+		panic("len(a) != len(b)")
+	}
 	for i := range a {
 		res += a[i] * b[i]
 	}
 	return res
 }
 
-func prediction(x []float64, w []float64, b float64) float64 {
-	return sigmoid(dot(w, x) + b)
+func prediction(x, w []float64, b float64) float64 {
+	return sigmoid(dot(x, w) + b)
 }
 
 func inference(inputs [][]float64, w []float64, b float64) (probabilities []float64) {
@@ -90,4 +94,15 @@ func accuracy(inputs [][]float64, y []float64, w []float64, b float64) float64 {
 		}
 	}
 	return correctCount / float64(len(inputs))
+}
+
+// Shuffles input in place
+func shuffleInput(inputs [][]float64, y []float64) {
+	if len(inputs) != len(y) {
+		panic("len(inputs) != len(y)")
+	}
+
+	rand.Shuffle(len(inputs), func(i, j int) {
+		inputs[i], y[i] = inputs[j], y[j]
+	})
 }

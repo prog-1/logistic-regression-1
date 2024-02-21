@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	epochCount                = 1e6
+	epochCount                = 1e5
 	lrw, lrb                  = 1e-3, 0.5
 	x1min, x1max              = 0, 100
 	screenWidth, screenHeight = 720, 480
@@ -20,6 +20,7 @@ const (
 
 func main() {
 	inputs, ys := ReadExams1()
+	shuffleInput(inputs, ys)
 	xTrain, xTest, yTrain, yTest := split(inputs, ys, testingSetRatio)
 
 	posScatter, negScatter, err := trainingInputScatters(xTrain, yTrain, color.RGBA{0, 255, 0, 255}, color.RGBA{255, 0, 0, 255})
