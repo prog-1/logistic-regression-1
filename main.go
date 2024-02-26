@@ -257,3 +257,7 @@ func (p plottable) Y(r int) float64 {
 func (p plottable) Z(c, r int) float64 {
 	return p.f(c, r)
 }
+
+//Todo:
+// you can shufffle indexes to get random train and test data
+// plotter.countermap
