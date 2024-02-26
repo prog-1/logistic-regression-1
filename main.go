@@ -29,7 +29,6 @@ func dot(a []float64, b []float64) (dot float64) {
 	}
 	return dot
 }
-
 func inference(inputs [][]float64, w []float64, b float64) (res []float64) {
 	res = make([]float64, len(inputs))
 	for i := 0; i < len(inputs); i++ {
@@ -48,7 +47,6 @@ func dCost(inputs [][]float64, y, p []float64) (dw []float64, db float64) {
 	}
 	return dw, db
 }
-
 func gradientDescent(inputs [][]float64, y, w []float64, alpha, b float64, epochs int) ([]float64, float64, []float64, float64) {
 	var dw []float64
 	var db float64
@@ -59,12 +57,9 @@ func gradientDescent(inputs [][]float64, y, w []float64, alpha, b float64, epoch
 			w[j] -= alpha * dw[j]
 		}
 		b -= alpha * db
-		//fmt.Println(dw, db)
-		//fmt.Println(w, b)
 	}
 	return w, b, dw, db
 }
-
 func accuracy(inputs [][]float64, y []float64, w []float64, b float64) float64 {
 	prediction := inference(inputs, w, b)
 	var truePos, trueNeg, falsePos, falseNeg float64
@@ -85,21 +80,14 @@ func accuracy(inputs [][]float64, y []float64, w []float64, b float64) float64 {
 	}
 	return (truePos + trueNeg) / (truePos + trueNeg + falsePos + falseNeg)
 }
-
 func split(data [][]string) (xTrain, xTest, kapusta [][]float64, yTrain, yTest []float64) {
-	half := len(data) / 2
-	segment := len(data[0])
-	xTrain = make([][]float64, half)
+	half, segment := len(data)/2, len(data[0])
+	xTrain, xTest = make([][]float64, half), make([][]float64, half)
 	for i := range xTrain {
 		xTrain[i] = make([]float64, segment-1)
-	}
-	yTrain = make([]float64, half)
-
-	xTest = make([][]float64, half)
-	for i := range xTest {
 		xTest[i] = make([]float64, segment-1)
 	}
-	yTest = make([]float64, half)
+	yTrain, yTest = make([]float64, half), make([]float64, half)
 
 	for i, row := range data[:half] {
 		for j := 0; j < 2; j++ {
@@ -107,7 +95,6 @@ func split(data [][]string) (xTrain, xTest, kapusta [][]float64, yTrain, yTest [
 		}
 		yTrain[i], _ = strconv.ParseFloat(row[2], 64)
 	}
-
 	for i, row := range data[half:] {
 		for j := 0; j < 2; j++ {
 			xTest[i][j], _ = strconv.ParseFloat(row[j], 64)
@@ -119,23 +106,11 @@ func split(data [][]string) (xTrain, xTest, kapusta [][]float64, yTrain, yTest [
 	for i := range data {
 		kapusta[i] = make([]float64, segment+1)
 	}
-	// kapusta = data[0], data[1], y
 	for i := range data {
 		kapusta[i][0], _ = strconv.ParseFloat(data[i][0], 64)
 		kapusta[i][1], _ = strconv.ParseFloat(data[i][1], 64)
-		//kapusta[i][2], _ = strconv.ParseFloat(data[i][2], 64)
 	}
-
-	//fmt.Println(xTrain, xTest, yTrain, yTest)
 	return xTrain, xTest, kapusta, yTrain, yTest
-}
-
-type plottable struct {
-	grid       [][]float64
-	N          int
-	M          int
-	resolution float64
-	f          func(c, r int) float64
 }
 
 func main() {
@@ -183,7 +158,6 @@ func main() {
 	plotData.grid = kapusta
 	plotData.N = len(kapusta)
 	plotData.M = len(kapusta)
-	plotData.resolution = 1
 	plotData.f = func(c, r int) float64 {
 		return sigmoid(dot([]float64{float64(c), float64(r)}, w) + b)
 	}
@@ -222,37 +196,25 @@ func main() {
 	if err := p.Save(4*vg.Inch, 4*vg.Inch, "scatter.png"); err != nil {
 		panic(err)
 	}
-	// draw heatmap
 	// special thanks to
 	//https://medium.com/@balazs.dianiska/generating-heatmaps-with-go-83988b22c000
-	// The only question is
-	// what does the heatmap show?
-	// how to tweak values for the best result?
-	// kapusta?
-	//ph := plot.New()
-	// var plotData plottable
-	// plotData.grid = kapusta
-	// plotData.N = len(kapusta)
-	// plotData.M = len(kapusta)
-	// plotData.resolution = 1
-	// plotData.f = func(c, r int) float64 {
-	// 	return sigmoid(dot([]float64{float64(c), float64(r)}, w) + b)
-	// }
-	// pal := moreland.SmoothBlueRed().Palette(255)
-	// heatmap := plotter.NewHeatMap(plotData, pal)
-	// p.Add(heatmap)
-	// if err := p.Save(4*vg.Inch, 4*vg.Inch, "heatmap.png"); err != nil {
-	// 	panic(err)
-	// }
 }
+
+type plottable struct {
+	grid [][]float64
+	N    int
+	M    int
+	f    func(c, r int) float64
+}
+
 func (p plottable) Dims() (c, r int) {
 	return p.N, p.M
 }
 func (p plottable) X(c int) float64 {
-	return float64(c) * p.resolution
+	return float64(c)
 }
 func (p plottable) Y(r int) float64 {
-	return float64(r) * p.resolution
+	return float64(r)
 }
 func (p plottable) Z(c, r int) float64 {
 	return p.f(c, r)
