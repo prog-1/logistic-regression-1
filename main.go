@@ -117,14 +117,13 @@ func split(data [][]string) (xTrain, xTest, kapusta [][]float64, yTrain, yTest [
 
 	kapusta = make([][]float64, len(data))
 	for i := range data {
-		kapusta[i] = make([]float64, segment)
+		kapusta[i] = make([]float64, segment+1)
 	}
-	// kapusta = data[0] + data[1], y
+	// kapusta = data[0], data[1], y
 	for i := range data {
 		kapusta[i][0], _ = strconv.ParseFloat(data[i][0], 64)
-		a, _ := strconv.ParseFloat(data[i][1], 64)
-		kapusta[i][0] = a
-		kapusta[i][2], _ = strconv.ParseFloat(data[i][2], 64)
+		kapusta[i][1], _ = strconv.ParseFloat(data[i][1], 64)
+		//kapusta[i][2], _ = strconv.ParseFloat(data[i][2], 64)
 	}
 
 	//fmt.Println(xTrain, xTest, yTrain, yTest)
@@ -136,8 +135,7 @@ type plottable struct {
 	N          int
 	M          int
 	resolution float64
-	minX       float64
-	minY       float64
+	f          func(c, r int) float64
 }
 
 func main() {
@@ -156,7 +154,7 @@ func main() {
 	p := plot.New()
 	var dw []float64
 	var db float64
-	xTrain, xTest, _, yTrain, yTest := split(data)
+	xTrain, xTest, kapusta, yTrain, yTest := split(data)
 	w := make([]float64, len(xTrain[0]))
 	for i := range w {
 		w[i] = rand.Float64() * 2
@@ -181,7 +179,20 @@ func main() {
 			drawG = append(drawG, struct{ X, Y float64 }{X: xTrain[i][0], Y: xTrain[i][1]})
 		}
 	}
-
+	var plotData plottable
+	plotData.grid = kapusta
+	plotData.N = len(kapusta)
+	plotData.M = len(kapusta)
+	plotData.resolution = 1
+	plotData.f = func(c, r int) float64 {
+		return sigmoid(dot([]float64{float64(c), float64(r)}, w) + b)
+	}
+	pal := moreland.SmoothBlueRed().Palette(255)
+	heatmap := plotter.NewHeatMap(plotData, pal)
+	p.Add(heatmap)
+	if err := p.Save(4*vg.Inch, 4*vg.Inch, "heatmap.png"); err != nil {
+		panic(err)
+	}
 	scatterR, err := plotter.NewScatter(drawR)
 	if err != nil {
 		panic(err)
@@ -218,30 +229,31 @@ func main() {
 	// what does the heatmap show?
 	// how to tweak values for the best result?
 	// kapusta?
-	ph := plot.New()
-	var plotData plottable
-	plotData.grid = xTest
-	plotData.N = len(xTest)
-	plotData.M = len(xTest[0])
-	plotData.resolution = 0.9
-	plotData.minX = 25
-	plotData.minY = 0
-	pal := moreland.SmoothBlueRed().Palette(255)
-	heatmap := plotter.NewHeatMap(plotData, pal)
-	ph.Add(heatmap)
-	if err := ph.Save(4*vg.Inch, 4*vg.Inch, "heatmap.png"); err != nil {
-		panic(err)
-	}
+	//ph := plot.New()
+	// var plotData plottable
+	// plotData.grid = kapusta
+	// plotData.N = len(kapusta)
+	// plotData.M = len(kapusta)
+	// plotData.resolution = 1
+	// plotData.f = func(c, r int) float64 {
+	// 	return sigmoid(dot([]float64{float64(c), float64(r)}, w) + b)
+	// }
+	// pal := moreland.SmoothBlueRed().Palette(255)
+	// heatmap := plotter.NewHeatMap(plotData, pal)
+	// p.Add(heatmap)
+	// if err := p.Save(4*vg.Inch, 4*vg.Inch, "heatmap.png"); err != nil {
+	// 	panic(err)
+	// }
 }
 func (p plottable) Dims() (c, r int) {
 	return p.N, p.M
 }
 func (p plottable) X(c int) float64 {
-	return p.minX + float64(c)*p.resolution
+	return float64(c) * p.resolution
 }
 func (p plottable) Y(r int) float64 {
-	return p.minY + float64(r)*p.resolution
+	return float64(r) * p.resolution
 }
 func (p plottable) Z(c, r int) float64 {
-	return p.grid[c][r]
+	return p.f(c, r)
 }
