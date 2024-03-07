@@ -15,7 +15,7 @@ const (
 	lrw, lrb                  = 1e-3, 0.5
 	x1min, x1max              = 0, 100
 	screenWidth, screenHeight = 720, 480
-	testingSetRatio           = 20
+	testingSetRatio           = 20 // Percentage of the dataset to be used for testing
 )
 
 func main() {
@@ -30,7 +30,11 @@ func main() {
 
 	img := make(chan *image.RGBA, 1)
 	sink := func(epoch int, w, dw []float64, b, db float64) {
-		dbf, err := plotter.NewLine(plotter.XYs{{X: x1min, Y: decisionBoundaryFunc(w, b)(x1min)}, {X: x1max, Y: decisionBoundaryFunc(w, b)(x1max)}})
+		if len(w) != len(dw) {
+			panic("len(w) != len(dw)")
+		}
+		// dbf is the decision boundary function
+		dbf, err := plotter.NewLine(plotter.XYs{{X: x1min, Y: decisionBoundaryLinearFunc(w, b)(x1min)}, {X: x1max, Y: decisionBoundaryLinearFunc(w, b)(x1max)}})
 		if err != nil {
 			log.Fatal(err)
 		}

@@ -5,10 +5,6 @@ import (
 	"math/rand"
 )
 
-const (
-	randMin, randMax = 1500, 2000
-)
-
 func sigmoid(z float64) float64 {
 	return 1 / (1 + math.Exp(-z))
 }
@@ -28,6 +24,10 @@ func prediction(x, w []float64, b float64) float64 {
 }
 
 func inference(inputs [][]float64, w []float64, b float64) (probabilities []float64) {
+	if len(inputs[0]) != len(w) {
+		panic("len(inputs[0]) != len(w)")
+	}
+
 	for _, x := range inputs {
 		probabilities = append(probabilities, prediction(x, w, b))
 	}
@@ -35,7 +35,7 @@ func inference(inputs [][]float64, w []float64, b float64) (probabilities []floa
 }
 
 func dCost(inputs [][]float64, labels, y []float64) (dw []float64, db float64) {
-	dw = make([]float64, argumentCount)
+	dw = make([]float64, len(inputs[0]))
 	var diff float64
 	m := float64(len(inputs))
 	for i := range inputs {
@@ -55,7 +55,7 @@ func train(epochCount int, inputs [][]float64, ys []float64, lrw, lrb float64, s
 		panic("no training examples provided")
 	}
 
-	w = make([]float64, argumentCount)
+	w = make([]float64, len(inputs[0]))
 	for epoch := 0; epoch < epochCount; epoch++ {
 		dw, db := dCost(inputs, ys, inference(inputs, w, b))
 
@@ -71,7 +71,7 @@ func train(epochCount int, inputs [][]float64, ys []float64, lrw, lrb float64, s
 	return w, b, nil
 }
 
-func decisionBoundaryFunc(w []float64, b float64) func(float64) float64 {
+func decisionBoundaryLinearFunc(w []float64, b float64) func(float64) float64 {
 	if len(w) != 2 {
 		panic("more than 2 parameters in model")
 	}
