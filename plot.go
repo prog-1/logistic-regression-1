@@ -10,12 +10,12 @@ import (
 	"gonum.org/v1/plot/vg/vgimg"
 )
 
-func Plot(ps ...plot.Plotter) *image.RGBA {
+func Plot(legend string, ps ...plot.Plotter) *image.RGBA {
 	p := plot.New()
 	p.Add(append([]plot.Plotter{
 		plotter.NewGrid(),
 	}, ps...)...)
-
+	p.Legend.Add(legend)
 	img := image.NewRGBA(image.Rect(0, 0, screenWidth, screenHeight))
 	c := vgimg.NewWith(vgimg.UseImage(img))
 	p.Draw(draw.New(c))

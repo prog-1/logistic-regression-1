@@ -14,7 +14,7 @@ const (
 	epochCount                = 1e5
 	lrw, lrb                  = 1e-3, 0.5
 	x1min, x1max              = 0, 100
-	screenWidth, screenHeight = 720, 480
+	screenWidth, screenHeight = 640, 480
 	testingSetRatio           = 20 // Percentage of the dataset to be used for testing
 )
 
@@ -27,8 +27,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	img := make(chan *image.RGBA, 1)
+	imgChannel := make(chan *image.RGBA, 1)
 	sink := func(epoch int, w, dw []float64, b, db float64) {
 		if len(w) != len(dw) {
 			panic("len(w) != len(dw)")
@@ -38,8 +37,10 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
+
+		legend := fmt.Sprintf("Accuracy: %v", accuracy(inputs, ys, w, b))
 		select {
-		case img <- Plot(posScatter, negScatter, dbf):
+		case imgChannel <- Plot(legend, posScatter, negScatter, dbf):
 		default:
 		}
 		if epoch%1e4 == 0 {
@@ -57,7 +58,7 @@ func main() {
 		}
 	}()
 
-	if err := ebiten.RunGame(&App{Img: img}); err != nil {
+	if err := ebiten.RunGame(&App{Img: imgChannel}); err != nil {
 		log.Fatal(err)
 	}
 }
