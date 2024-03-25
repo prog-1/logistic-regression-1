@@ -12,7 +12,6 @@ import (
 
 const (
 	argumentCount = 2
-	classCount    = 2
 )
 
 // Reads data from data/exams1.csv and returns [][argumentCount]float64 with labels
