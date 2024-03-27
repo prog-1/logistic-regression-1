@@ -4,6 +4,7 @@ go 1.21.6
 
 require (
 	github.com/hajimehoshi/ebiten/v2 v2.6.6
+	gonum.org/v1/gonum v0.14.0
 	gonum.org/v1/plot v0.14.0
 )
 

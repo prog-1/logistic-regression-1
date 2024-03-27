@@ -4,46 +4,9 @@ import (
 	"errors"
 	"fmt"
 	"image/color"
-	"log"
-	"strconv"
 
 	"gonum.org/v1/plot/plotter"
 )
-
-const (
-	argumentCount = 2
-)
-
-// Reads data from data/exams1.csv and returns [][argumentCount]float64 with labels
-func ReadExams1() (inputs [][]float64, ys []float64) {
-	parseRow := func(row []string) error {
-		if len(row) != argumentCount+1 {
-			return fmt.Errorf("row length != %v", argumentCount+1)
-		}
-
-		var err error
-		x := make([]float64, 2)
-		for i := range x {
-			x[i], err = strconv.ParseFloat(row[i], 64)
-			if err != nil {
-				return err
-			}
-		}
-		var y float64
-		y, err = strconv.ParseFloat(row[argumentCount], 64)
-		if err != nil {
-			return err
-		}
-
-		inputs, ys = append(inputs, x), append(ys, y)
-
-		return nil
-	}
-	if err := readCSV("data/exams1.csv", parseRow); err != nil {
-		log.Fatal(err)
-	}
-	return inputs, ys
-}
 
 // Returns input vector plotters separated by label value(1 or 0)
 // Assumes having only 2 classes: 1 and 0
